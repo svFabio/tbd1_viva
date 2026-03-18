@@ -1,3 +1,6 @@
 # INTEGRANTES
-**1. Dadier Cadima Pozo**
-**2. Fabio Andres Salguero Velazco**
+
+- **Dadier Cadima Pozo**
+- **Fabio Andres Salguero Velazco**
+- ** **
+- ** **

@@ -1,15 +1,15 @@
 # SISTEMA DE GESTION DE TELECOMUNICACIONES (VIVA)
 
-El presente proyecto se enfoca de manera estricta en el diseño e implementación del modelo relacional de la Base de Datos para el sistema de soporte comercial (BSS) de Nuevatel (VIVA), sin abarcar el desarrollo de aplicaciones.
+El presente proyecto se enfoca en el diseño e implementación del modelo relacional de la Base de Datos para Nuevatel (VIVA).
 
-## 1. Objetivos y Entregables Mínimos
-La meta principal es construir una estructura de base de datos normalizada para el negocio, entregando:
+## 1. Objetivos y Entregables
+La meta principal es diseñar una estructura de base de datos entregando:
 *   **Modelo de Datos:** Diagrama Entidad-Relación (MER) y Modelo Lógico.
 *   **Implementación (DDL):** Scripts SQL para la creación de esquemas, tablas cruzadas, tipos de datos e índices.
 *   **Datos de Prueba (DML):** Poblamiento inicial con datos sintéticos (Data Seeding) representativos.
 *   **Lógica de Negocio (PL/SQL):** Almacenamiento de procesos críticos (Ej: Facturación, Validación de Recargas) en Procedimientos Almacenados y Funciones.
-*   **Reglas Automáticas y Auditoría:** Triggers para gestionar la integridad y control de saldos/moras.
-*   **Explotación de Datos:** Scripts con consultas complejas y vistas para reportes operativos.
+*   **Reglas Automáticas y Auditoría:** Triggers para gestionar la integridad y control como ser: saldos, prestamos, etc.
+*   **Explotación de Datos:** Scripts con consultas para reportes, análisis de comportamiento de los clientes y de la empresa.
 
 ## 2. Dominio a Modelar (Módulos Base)
 La base de datos cubrirá exclusivamente las operaciones comerciales de los clientes:

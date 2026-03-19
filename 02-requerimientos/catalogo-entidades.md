@@ -20,5 +20,5 @@
 | **Promocion** | Permite activar ofertas como **sMartes** o **RompeBolsas** en ventanas de tiempo específicas (ej. martes 06:00-23:59) sin duplicar tablas de productos. |
 | **Consumo_Detalle** | Almacena el tráfico granular (MB, Minutos, SMS) de los últimos **5 días**. Es vital para que la App muestre al usuario en qué aplicaciones gastó sus recursos. |
 | **Historico_Transaccion (Archive)** | Indispensable para la **"Rotación de Tablas" cada 15 días**. Aquí se mueven los datos de consumo y puntos para mantener la base de datos operativa ligera y rápida. |
-| **Cuenta_Corporativa** | Permite agrupar múltiples líneas bajo un solo NIT, habilitando beneficios de **VPN Empresarial** (llamadas gratis en el grupo) y bolsas compartidas. |
+| **Cuenta_Corporativa** | Permite agrupar múltiples líneas bajo un solo NIT, habilitando beneficios de ** Empresarial** (llamadas gratis en el grupo) y bolsas compartidas. |
 | **Chip (IMSI)** | Permite el **"reciclaje de líneas"**. Al separar el número de teléfono del identificador físico del chip, se pueden reasignar números a nuevos clientes sin perder historial técnico. |

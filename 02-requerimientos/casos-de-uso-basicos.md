@@ -52,4 +52,4 @@ Este documento describe de forma clara los casos de uso principales para el ecos
 | N° | Caso de Uso | Descripción |
 |:---|:---|:---|
 | **15.** | **Generar Reporte de Consumos** | Permite extraer estadísticas sobre el uso de datos y voz por segmentos. |
-| **16.** | **Generar Reporte de Ingresos** | Permite visualizar los ingresos percibidos por recargas y pagos de facturas en un periodo determinado. |
+| **16.** | **Generar Reporte de Ingresos** | Permite visualizar los ingresos percibidos por recargas y pagos de facturas en un periodo determinado. 

@@ -111,15 +111,3 @@ Restricción:
 
 ### Identificadores (IDs)
 Todas las transacciones deben generar un identificador alfanumérico único basado en la hora exacta (incluyendo milisegundos) para evitar duplicidad al mover datos entre tablas.
-
-### Rotación Quincenal
-- El sistema debe ejecutar rotación de tablas cada 15 días  
-- Los registros activos se mueven a tablas de Archivo o Histórico  
-- Objetivo: mantener el rendimiento del sistema  
-
-### Ventana de Auditoría
-La base de datos debe permitir al usuario consultar en tiempo real el detalle de sus consumos de los últimos 5 días.
-
-
-
-## FALTA LAS BOLSAS QUE SIEMPRE ESTAN CON LOS PRECIOS ACTUALIZADOS

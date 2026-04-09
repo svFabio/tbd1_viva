@@ -1,23 +1,36 @@
-# SISTEMA DE GESTION DE TELECOMUNICACIONES (VIVA)
+# Alcance del Sistema — VIVA
 
-El presente proyecto se enfoca en el diseño e implementación del modelo relacional de la Base de Datos para Nuevatel (VIVA).
+## ¿Qué cubre este sistema?
 
-## 1. Alcance
-La meta principal es diseñar una estructura de base de datos entregando:
-*   **Modelo de Datos:** Diagrama Entidad-Relación (MER) y Modelo Lógico.
+Este documento define con precisión qué funcionalidades y datos entran dentro del sistema de base de datos, y cuáles quedan fuera de esta fase.
 
-*   **Lógica de Negocio:** Almacenamiento de procesos críticos (Ej: Facturación, Validación de Recargas) en Procedimientos Almacenados y Funciones.
+---
 
+## Dentro del alcance
 
-SEGÚN EL DIAGRAMA QUE TENEMOS:
-- NUMERO AMIGO TENEMOS? 
-- NAVEGADOR
-- T-PRESTA TENEMOS? 
-- TRANSFUZION TENEMOS? 
-- BONUS CLUB TENEMOS? 
-- VER MÁS)
+| Área | Qué se gestiona |
+|------|----------------|
+| **Clientes** | Personas naturales y empresas. Herencia 1:1 desde tabla base Cliente. |
+| **Líneas telefónicas** | Alta, baja, suspensión, reciclaje. Historial de estados. |
+| **SIM Cards** | Stock, activación, reemplazo, baja. Historial de chip por línea. |
+| **Equipos (IMEI)** | Registro de teléfonos físicos. Historial de qué equipo usó cada línea. |
+| **Planes** | Catálogo de planes prepago, postpago, individuales y corporativos. |
+| **Saldo y bolsillos** | Regular, promocional y prestado. Aplica a cualquier tipo de línea. |
+| **Recargas** | Tarjeta física, app, banca digital, punto de venta. |
+| **Paquetes y bolsas** | Catálogo, compra, consumo en tiempo real, apps exentas. |
+| **Consumos** | Llamadas, SMS, datos, LDI. Registro detallado por evento. |
+| **T-Presta** | Préstamos de saldo y su ciclo de vida. |
+| **Transfuzión** | Transferencias de saldo entre líneas VIVA. |
+| **Facturas postpago** | Generación mensual y control de deuda. |
+| **Promociones** | Campañas de doble carga, bonos, descuentos con horario. |
+| **Puntos BONUS** | Acumulación por distintos eventos, canje por paquetes. |
+| **Número Amigo** | Registro y verificación en tiempo real al registrar llamadas. |
 
+---
 
-## 2. Límites 
-Para evitar desviaciones, en esta etapa 
+## Límites
 
+| Área | Razón |
+|------|-------|
+| Roaming  | Se registra como tipo de consumo pero no se modela la red de roaming. |
+| Roles en el sistema| No se contemplaran roles de ningun tipo como por ejemplo administrador|

@@ -31,23 +31,3 @@
 **RS-I08** El `numero` (MSISDN) en `Linea` es único. No pueden existir dos líneas con el mismo número en el sistema.
 
 ---
-
-## Roles de acceso
-
-**RS-R01 — Administrador de BD**
-Acceso total a todas las tablas. Solo para el equipo técnico responsable del mantenimiento del sistema.
-
-**RS-R02 — Atención al cliente**
-Acceso de lectura a datos de clientes, líneas, consumos, recargas y préstamos. Sin acceso a datos financieros agregados ni información corporativa sensible. Sin permisos de escritura directa.
-
-**RS-R03 — Sistema de facturación**
-Acceso de escritura a `Factura` y lectura a `Linea_Postpago` y `Consumo`. Sin acceso a datos personales de clientes.
-
-**RS-R04 — App del cliente (usuario final)**
-Acceso de lectura solo a sus propios datos: su línea, su bolsillo, sus bolsas activas, su historial de recargas y consumos. Sin acceso a datos de otros clientes.
-
-**RS-R05 — Sistema transaccional (backend)**
-Acceso de escritura a tablas de alta volumetría: `Consumo`, `Transaccion`, `Recarga`, `Bolsa_Activa`. Acceso de lectura a catálogos: `Plan`, `Paquete`, `Promocion`.
-
-**RS-R06 — Business Intelligence / Reportes**
-Acceso de lectura a tablas históricas y agregadas. Sin acceso a datos personales identificables de clientes.

@@ -20,7 +20,7 @@ El modelo cumple 1FN en todos sus campos. No hay columnas que guarden listas ni 
 
 **Regla:** Todos los atributos no clave dependen de la **clave completa**, no de una parte de ella.
 
-Aplica solo a tablas con claves primarias compuestas. En este modelo, las tablas de relación N:M (`Historial_Linea_Equipo`, `Numero_Amigo`, `Transfuzion`) tienen su propia PK autoincremental, por lo que 2FN se cumple.
+Aplica solo a tablas con claves primarias compuestas. En este modelo, las tablas de relación N:M (`Numero_Amigo`, `Transfuzion`) tienen su propia PK autoincremental, por lo que 2FN se cumple.
 
 
 ## Tercera Forma Normal (3FN)
@@ -52,5 +52,3 @@ La mayoría de tablas cumplen 3FN. Por ejemplo, en `Linea`, todos los campos dep
 #### 3. `Bolsa_Activa` — Duplicación de mb_total y minutos_total
 
 `mb_total` y `minutos_total` duplican información del `Paquete` al momento de la compra. Es intencional: si VIVA cambia el paquete en el catálogo, las bolsas ya compradas no deben cambiar.
-
-**Esto es correcto** y no es una violación: captura el valor histórico al momento de la transacción. Es un patrón estándar en bases de datos de negocio.

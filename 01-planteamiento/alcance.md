@@ -25,5 +25,4 @@
 |---|---|
 | Roaming internacional | Depende de acuerdos con operadoras extranjeras y regulaciones internacionales fuera del control del sistema interno |
 | Pagos en línea / pasarela de cobro | Es un sistema externo al modelo de datos |
-| Grupos corporativos con pool compartido | Pendiente para una versión futura |
 | Facturación tributaria centralizada | Las recargas registran el NIT en `Recarga.nit_factura`; la factura postpago es estado de cuenta mensual |

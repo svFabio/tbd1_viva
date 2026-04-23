@@ -4,4 +4,4 @@
 - **15-03-2026 a 18-03-2026**: 01-planteamiento
 - **19-03-2026 a 22-03-2026**: 02-requerimientos
 - **23-03-2026 a 26-03-2026**: 03-modelo-conceptual
-- **27-03-2026 a 31-03-2026**: 04-modelo-logico
+- **27-03-2026 a 08-04-2026**: 04-modelo-logico

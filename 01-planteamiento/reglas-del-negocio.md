@@ -1,113 +1,47 @@
-# Reglas de Negocio Telcom VIVA
+# Reglas del Negocio
 
-## 1. Gestión de Clientes e Identidad Técnica
-
-### Propiedad de Línea
-Un cliente puede poseer múltiples líneas telefónicas, pero cada línea debe estar vinculada obligatoriamente a un único cliente titular.
-
-### Vínculo Técnico
-Cada línea telefónica debe asociarse con:
-- Un identificador de chip físico (IMSI)  
-- Un registro de equipo (IMEI)  
-
-Esto con fines de seguridad y auditoría.
-
-### Reciclaje de Números
-Si una línea entra en desuso y cumple el periodo establecido:
-- El sistema debe permitir desvincular el número del IMSI antiguo  
-- El número puede ser reactivado con un nuevo chip  
-
-### Restricción de Datos
-Por normativa:
-- Si una línea no tiene una bolsa activa, el sistema debe bloquear el consumo de internet desde el saldo principal  
-- Solo se permite si el usuario lo habilita explícitamente  
+Estas son las reglas que el sistema DEBE respetar. Si alguna se rompe, los datos pierden sentido.
 
 ---
 
-## 2. Programa de Lealtad (**BONUS CLUB POR DEFINIR**)
+**RN-01 — T-Presta: condiciones de habilitación**
+Una línea solo puede pedir préstamo si tiene al menos 3 meses desde su activación Y no tiene ningún T-Presta con estado_deuda = PENDIENTE.
 
-### Acumulación Individual
-- Los puntos se calculan por cada línea de forma independiente  
-- No se permite la transferencia de puntos entre líneas del mismo cliente  
+**RN-02 — T-Presta: cobro automático**
+Cuando el cliente recarga, si tiene saldo_prestado > 0, el sistema descuenta primero la deuda y solo acredita el restante al saldo regular.
 
-### Lógica de Niveles
+**RN-03 — Orden de consumo de saldo**
+El saldo se consume en este orden: primero saldo_promocional, luego saldo_regular. El saldo_prestado se cobra al recargar.
 
-- Básico:
-  - Multiplicador x1  
-  - Vigencia de puntos: 3 meses  
+**RN-04 — Doble Carga**
+El bono de la doble carga va siempre al saldo_promocional, no al regular. El saldo_regular solo recibe el monto real recargado.
 
-- Élite:
-  - Requiere canje de 4,500 puntos  
-  - Multiplicador x2  
-  - Vigencia de puntos: 4 meses  
+**RN-05 — Bolsas y prioridad**
+Si hay varias bolsas activas, se consume primero la de mayor nivel_prioridad en Paquete. El backend decide; la BD solo guarda el estado resultante.
 
-### Eventos de Suma
-El sistema debe registrar puntos por:
+**RN-06 — Número Amigo: verificación**
+Al registrar un consumo de llamada, si existe un Numero_Amigo activo con ese destino, costo_bs = 0 y es_cobrado = false.
 
-- 1 punto por minuto de navegación en la App  
-- Recargas ≥ 10 Bs:
-  - Básico: 13 puntos  
-  - Élite: 26 puntos  
-- Cumplimiento de rachas de visita:
-  - 7 días  
-  - 30 días  
+**RN-07 — Factura postpago**
+Se genera una factura por período mensual para cada Linea_Postpago. El monto es el precio_mensual del plan contratado, no la suma de consumos.
 
-### Canje Híbrido
-El sistema debe soportar transacciones donde el costo de una bolsa se cubra mediante una combinación de dinero y puntos BONUS.
+**RN-08 — SIM Card: una activa por línea**
+Linea.id_sim_activo siempre apunta a una SIM con estado = ACTIVA. El historial de SIMs anteriores no se modela en esta versión.
 
-### Caducidad de Premios
-Si se canjea un souvenir físico (Market):
-- El usuario tiene 3 días hábiles para recogerlo  
-- Si no lo hace, el sistema debe anular la orden automáticamente  
+**RN-09 — Tarjeta Recarga: valores fijos**
+Los montos permitidos son Bs 10, 20, 50 y 100. Cualquier otro valor es inválido. La validación es responsabilidad del backend.
 
----
+**RN-10 — Puntos BONUS: ganancia**
+Los puntos se ganan por recargas, navegación y referidos. Cada tipo de evento queda registrado en Evento_bonus con su tipo y puntos otorgados.
 
-## 3. Microfinanzas (VIVA T-Presta)
+**RN-11 — Transfuzión: restricciones**
+Solo se puede transferir saldo entre líneas VIVA. El monto debe ser mayor a 0. El límite diario lo controla el backend.
 
-### Elegibilidad
-Un usuario califica para un préstamo si:
-- Saldo < 5 Bs  
-- Antigüedad ≥ 30 días  
-- Recarga en los últimos 30 días ≥ 10 Bs  
+**RN-12 — Estado de línea**
+Una línea puede estar en: ACTIVA, SUSPENDIDA, BAJA o EN_RECICLAJE. Solo las líneas ACTIVAS pueden hacer recargas, consumos y préstamos.
 
-### Límites Dinámicos
-El monto máximo de crédito (entre 10 Bs y 120 Bs) debe calcularse en función de:
-- Antigüedad de la línea  
-- Historial de recargas de los últimos 30 días  
+**RN-13 — Cliente: discriminador**
+Cliente.tipo_cliente puede ser NATURAL o EMPRESA. Determina en qué tabla subtipo buscar los datos específicos del cliente.
 
-### Prioridad de Cobro
-- Ante cualquier recarga, el sistema debe descontar automáticamente la deuda pendiente (sin intereses)  
-- Si el saldo es insuficiente, se aplican cobros parciales en futuras recargas  
-
----
-
-## 4. Promociones y Transferencias
-
-### sMartes
-- Disponible solo los martes entre 06:00 y 23:59  
-- Bolsas a 0.99 Bs  
-
-Restricción:
-- Usuarios prepago no deben haber usado "Doble Carga" > 10 Bs en los últimos 30 días  
-
-### RompeBolsas
-- Ofertas con 50% de descuento  
-- Disponibles por 24 horas en fechas festivas  
-- Exclusivas para compra en la VIVA App  
-
-### Transfuzión
-
-#### Requisitos (Prepago)
-- Antigüedad ≥ 90 días  
-- Recarga acumulada ≥ 20 Bs  
-
-#### Monto
-- Solo se permiten montos enteros  
-- Rango: 1 Bs a 90 Bs  
-
----
-
-## 5. Restricciones de Escalabilidad (Arquitectura)
-
-### Identificadores (IDs)
-Todas las transacciones deben generar un identificador alfanumérico único basado en la hora exacta (incluyendo milisegundos) para evitar duplicidad al mover datos entre tablas.
+**RN-14 — Bolsillo: una sola fila**
+Cada línea tiene exactamente una fila en Bolsillo. Se crea al activar la línea y solo se actualiza (UPDATE), nunca se inserta una segunda vez.

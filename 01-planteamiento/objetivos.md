@@ -1,7 +1,7 @@
 # OBJETIVOS
 
 ## Objetivo General
-Diseñar e implementar una base de datos relacional robusta y escalable que permita gestionar y centralizar de manera eficiente la información del ecosistema digital de VIVA (Nuevatel PCS de Bolivia S.A.), abarcando su infraestructura operativa, segmentos de clientes (individuales y corporativos), servicios de conectividad y programas de fidelidad.
+Diseñar base de datos relacional escalable que permita gestionar y centralizar de manera eficiente la información del ecosistema digital de VIVA (Nuevatel PCS de Bolivia S.A.), abarcando su infraestructura operativa, segmentos de clientes, servicios de conectividad y programas de fidelidad.
 
 ## Objetivos Específicos
 1. **Analizar el dominio** del ecosistema digital y de telecomunicaciones de VIVA para identificar los requerimientos de información, reglas de negocio y restricciones del sistema.

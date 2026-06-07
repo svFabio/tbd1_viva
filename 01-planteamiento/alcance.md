@@ -1,36 +1,28 @@
-# Alcance del Sistema — VIVA
+# Alcance del Sistema
 
-## ¿Qué cubre este sistema?
+## ¿Qué SÍ modela este sistema?
 
-Este documento define con precisión qué funcionalidades y datos entran dentro del sistema de base de datos, y cuáles quedan fuera de esta fase.
-
----
-
-## Dentro del alcance
-
-| Área | Qué se gestiona |
-|------|----------------|
-| **Clientes** | Personas naturales y empresas. Herencia 1:1 desde tabla base Cliente. |
-| **Líneas telefónicas** | Alta, baja, suspensión, reciclaje. Historial de estados. |
-| **SIM Cards** | Stock, activación, reemplazo, baja. Historial de chip por línea. |
-| **Equipos (IMEI)** | Registro de teléfonos físicos. Historial de qué equipo usó cada línea. |
-| **Planes** | Catálogo de planes prepago, postpago, individuales y corporativos. |
-| **Saldo y bolsillos** | Regular, promocional y prestado. Aplica a cualquier tipo de línea. |
-| **Recargas** | Tarjeta física, app, banca digital, punto de venta. |
-| **Paquetes y bolsas** | Catálogo, compra, consumo en tiempo real, apps exentas. |
-| **Consumos** | Llamadas, SMS, datos, LDI. Registro detallado por evento. |
-| **T-Presta** | Préstamos de saldo y su ciclo de vida. |
-| **Transfuzión** | Transferencias de saldo entre líneas VIVA. |
-| **Facturas postpago** | Generación mensual y control de deuda. |
-| **Promociones** | Campañas de doble carga, bonos, descuentos con horario. |
-| **Puntos BONUS** | Acumulación por distintos eventos, canje por paquetes. |
-| **Número Amigo** | Registro y verificación en tiempo real al registrar llamadas. |
+| # | Funcionalidad |
+|---|---------------|
+| 1 | Registro de clientes (personas naturales y empresas) |
+| 2 | Gestión de líneas prepago y postpago |
+| 3 | Registro de SIM Cards y equipos asignados |
+| 4 | Recargas de saldo (tarjeta física, app, banca digital) |
+| 5 | Préstamo de saldo T-Presta |
+| 6 | Transferencia de saldo entre líneas (Transfuzión) |
+| 7 | Compra y consumo de paquetes adicionales (Bolsas) |
+| 8 | Registro de consumos (llamadas, datos, SMS) |
+| 9 | Número Amigo (llamadas gratuitas entre líneas) |
+| 10 | Promociones y Doble Carga |
+| 11 | Facturación mensual para líneas postpago |
+| 12 | Acumulación y canje de puntos VIVA BONUS |
 
 ---
 
-## Límites
+## ¿Qué NO incluye el modelo?
 
-| Área | Razón |
-|------|-------|
-| Roaming  | Se registra como tipo de consumo pero no se modela la red de roaming. |
-| Roles en el sistema| No se contemplaran roles de ningun tipo como por ejemplo administrador|
+| Fuera del alcance | Razón |
+|---|---|
+| Roaming internacional | Depende de acuerdos con operadoras extranjeras y regulaciones internacionales fuera del control del sistema interno |
+| Pagos en línea / pasarela de cobro | Es un sistema externo al modelo de datos |
+| Facturación tributaria centralizada | Las recargas registran el NIT en `Recarga.nit_factura`; la factura postpago es estado de cuenta mensual |

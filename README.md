@@ -75,7 +75,7 @@ docker ps
 ```
 
 El contenedor se llama `contenedor-postgres-viva` y expone PostgreSQL en el puerto `5433`.
-Los scripts de `scripts_iniciales/` se ejecutan automaticamente al crear la base de datos por primera vez gracias al volumen montado en `/docker-entrypoint-initdb.d`.
+Todos los scripts de `scripts_iniciales/` y los datos semilla (`scripts_semilla/`) se ejecutan y sincronizan automáticamente al crear la base de datos por primera vez. **El entorno nace 100% listo, poblado y con sus secuencias correctamente resincronizadas.**
 
 Para ejecutar cualquier script de presentacion desde fuera del contenedor:
 

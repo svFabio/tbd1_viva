@@ -27,6 +27,11 @@ class TiendaPaquetes extends Page implements HasTable
 
     protected static string $view = 'filament.pages.tienda-paquetes';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->id_cliente !== null;
+    }
+
     public function table(Table $table): Table
     {
         return $table

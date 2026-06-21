@@ -11,6 +11,11 @@ class BolsilloWidget extends BaseWidget
 {
     protected static ?string $pollingInterval = '10s';
 
+    public static function canView(): bool
+    {
+        return auth()->user()->id_cliente !== null;
+    }
+
     protected function getStats(): array
     {
         $user = auth()->user();

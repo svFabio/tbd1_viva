@@ -5,6 +5,7 @@
 CREATE OR REPLACE FUNCTION seguridad.fn_auditoria_dml()
     RETURNS trigger
     LANGUAGE plpgsql
+    SECURITY DEFINER
 AS $function$
 DECLARE
     v_usuario varchar(50);
@@ -32,6 +33,7 @@ $function$;
 CREATE OR REPLACE FUNCTION seguridad.fn_auditoria_ddl()
     RETURNS event_trigger
     LANGUAGE plpgsql
+    SECURITY DEFINER
 AS $function$
 DECLARE
     obj record;

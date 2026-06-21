@@ -137,7 +137,8 @@ GRANT SELECT ON fidelizacion."Puntos_Bonus"     TO rol_app;
 
 -- ── seguridad: otorgar lo que falta ────────────────────────
 GRANT USAGE  ON SCHEMA seguridad            TO rol_app;
-GRANT UPDATE ON seguridad."Usuario_Sistema" TO rol_app;
+GRANT INSERT, UPDATE ON seguridad."Usuario_Sistema" TO rol_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA seguridad TO rol_app;
 
 
 -- =============================================================

@@ -55,10 +55,28 @@ class Login extends BaseLogin
                 $id_cliente = $linea->id_cliente;
             }
         } 
+        // 3. Verificamos si es un usuario administrador (username directo sin arroba ni 591)
+        elseif (preg_match('/^[a-zA-Z0-9_.]+$/', $identificador)) {
+            $admin = DB::table('seguridad.Usuario_Sistema')
+                ->where('username', $identificador)
+                ->whereNull('id_cliente')
+                ->first();
+            
+            if ($admin) {
+                return [
+                    'username' => $admin->username,
+                    'password' => $password,
+                ];
+            } else {
+                throw ValidationException::withMessages([
+                    'data.identificador' => 'Credenciales incorrectas o usuario no autorizado.',
+                ]);
+            }
+        }
         else {
             // Si no cumple el formato, detenemos el login
             throw ValidationException::withMessages([
-                'data.identificador' => 'El formato es inválido. Debe ser un correo electrónico válido o un número de celular de Bolivia que empiece con 591.',
+                'data.identificador' => 'El formato es inválido. Debe ser un correo, un celular (591...) o un username de admin.',
             ]);
         }
 

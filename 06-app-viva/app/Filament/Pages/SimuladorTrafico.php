@@ -31,13 +31,13 @@ class SimuladorTrafico extends Page
                 ->label('Navegar por Internet (Gasta 50 MB)')
                 ->color('primary')
                 ->icon('heroicon-o-globe-alt')
-                ->action(fn () => $this->simularConsumo('DATOS', 50, 'Navegaste por internet viendo memes.')),
+                ->action(fn () => $this->simularConsumo('Datos', 50, 'Navegaste por internet viendo memes.')),
                 
             Action::make('llamar')
                 ->label('Llamar a tu mamá (Gasta 5 Min)')
                 ->color('success')
                 ->icon('heroicon-o-phone')
-                ->action(fn () => $this->simularConsumo('VOZ', 5, 'Llamaste a tu mamá. ¡Qué buen hijo!')),
+                ->action(fn () => $this->simularConsumo('Voz', 5, 'Llamaste a tu mamá. ¡Qué buen hijo!')),
 
             Action::make('whatsapp')
                 ->label('Mandar WhatsApp')
@@ -63,12 +63,12 @@ class SimuladorTrafico extends Page
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
 
-            if ($tipo === 'DATOS') {
+            if ($tipo === 'Datos') {
                 if ($bolsillo->saldo_megas < $cantidad) {
                     throw new \Exception("No tienes suficientes Megas. Te faltan " . ($cantidad - $bolsillo->saldo_megas) . " MB.");
                 }
                 $bolsillo->saldo_megas -= $cantidad;
-            } elseif ($tipo === 'VOZ') {
+            } elseif ($tipo === 'Voz') {
                 if ($bolsillo->saldo_minutos < $cantidad) {
                     throw new \Exception("No tienes suficientes Minutos. Te faltan " . ($cantidad - $bolsillo->saldo_minutos) . " Min.");
                 }
@@ -113,7 +113,7 @@ class SimuladorTrafico extends Page
             // Tiene la app ilimitada
             DB::table('servicios.Consumo')->insert([
                 'id_linea' => $linea->id_linea,
-                'tipo_consumo' => strtoupper($nombreApp) . '_ILIMITADO',
+                'tipo_consumo' => 'Datos',
                 'cantidad' => 0,
                 'id_bolsa_activa' => $bolsaActiva->id_bolsa_activa,
                 'fecha_consumo' => Carbon::now()
@@ -126,7 +126,7 @@ class SimuladorTrafico extends Page
                 ->send();
         } else {
             // No tiene la app ilimitada, le cobramos megas normales
-            $this->simularConsumo('DATOS', $megasSiNoEsGratis, "Usaste $nombreApp pero NO lo tienes ilimitado. Te descontamos $megasSiNoEsGratis MB.");
+            $this->simularConsumo('Datos', $megasSiNoEsGratis, "Usaste $nombreApp pero NO lo tienes ilimitado. Te descontamos $megasSiNoEsGratis MB.");
         }
     }
 }

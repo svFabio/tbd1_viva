@@ -112,7 +112,7 @@ class TiendaPaquetes extends Page implements HasTable
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Notification::make()->title('Error')->body('Hubo un problema procesando tu compra.')->danger()->send();
+            Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }
     }
 }

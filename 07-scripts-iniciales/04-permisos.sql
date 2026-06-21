@@ -240,7 +240,12 @@ REVOKE ALL ON finanzas."Tarjeta_Recarga" FROM rol_auditor;
 REVOKE ALL ON comercial."Numero_Amigo"    FROM rol_reporte;
 REVOKE ALL ON finanzas."Tarjeta_Recarga"  FROM rol_reporte;
 
-
+-- =============================================================
+-- ROL: u_admin_web
+-- =============================================================
+-- Permiso indispensable para que Laravel pueda hacer el Login (Auth::attempt)
+GRANT USAGE ON SCHEMA seguridad TO u_admin_web;
+GRANT SELECT ON seguridad."Usuario_Sistema" TO u_admin_web;
 -- =============================================================
 -- PASO FINAL: Reactivar el event trigger
 -- =============================================================

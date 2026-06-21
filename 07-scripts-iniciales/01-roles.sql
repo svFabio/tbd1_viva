@@ -27,6 +27,4 @@ GRANT rol_auditor TO u_admin_web;
 GRANT rol_reporte TO u_admin_web;
 GRANT rol_finanzas TO u_admin_web;
 
--- Permiso indispensable para que Laravel pueda hacer el Login (Auth::attempt)
-GRANT USAGE ON SCHEMA seguridad TO u_admin_web;
-GRANT SELECT ON seguridad."Usuario_Sistema" TO u_admin_web;
+

@@ -53,6 +53,22 @@ class TiendaPaquetes extends Page implements HasTable
                     ->label('Duración (Días)')
                     ->numeric()
                     ->sortable(),
+
+                TextColumn::make('beneficios')
+                    ->label('Incluye')
+                    ->getStateUsing(function (Paquete $record) {
+                        $b = [];
+                        if ($record->megas > 0) {
+                            $b[] = ($record->megas >= 1024) ? ($record->megas/1024).' GB' : $record->megas.' MB';
+                        }
+                        if ($record->minutos > 0) $b[] = $record->minutos.' Min';
+                        if ($record->sms > 0) $b[] = $record->sms.' SMS';
+                        if ($record->whatsapp_ilimitado) $b[] = 'WhatsApp Ilimitado';
+                        if ($record->redes_sociales) $b[] = 'Redes Sociales';
+                        return empty($b) ? 'Solo Servicios Base' : implode(', ', $b);
+                    })
+                    ->badge()
+                    ->color('info'),
             ])
             ->actions([
                 Action::make('comprar')
@@ -91,17 +107,12 @@ class TiendaPaquetes extends Page implements HasTable
             // 1. Descontar dinero
             $bolsillo->saldo_dinero -= $paquete->costo;
 
-            // 2. Extraer beneficios del texto (Megas o Minutos)
-            $nombre = strtolower($paquete->nombre_paquete);
-            $megas = 0;
-            $minutos = 0;
+            // 2. Extraer beneficios de las columnas oficiales
+            $bolsillo->saldo_megas += $paquete->megas ?? 0;
+            $bolsillo->saldo_minutos += $paquete->minutos ?? 0;
+            // Ojo: WhatsApp Ilimitado y Redes Sociales Ilimitadas 
+            // se manejan lógicamente verificando si el usuario tiene una BolsaActiva vigente.
             
-            if (preg_match('/(\d+)\s*mb/', $nombre, $m)) $megas = (int)$m[1];
-            if (preg_match('/(\d+)\s*gb/', $nombre, $m)) $megas = (int)$m[1] * 1024;
-            if (preg_match('/(\d+)\s*minuto/', $nombre, $m)) $minutos = (int)$m[1];
-
-            $bolsillo->saldo_megas += $megas;
-            $bolsillo->saldo_minutos += $minutos;
             $bolsillo->save();
 
             // 3. Registrar Bolsa Activa

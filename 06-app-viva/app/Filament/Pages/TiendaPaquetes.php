@@ -63,8 +63,11 @@ class TiendaPaquetes extends Page implements HasTable
                         }
                         if ($record->minutos > 0) $b[] = $record->minutos.' Min';
                         if ($record->sms > 0) $b[] = $record->sms.' SMS';
-                        if ($record->whatsapp_ilimitado) $b[] = 'WhatsApp Ilimitado';
-                        if ($record->redes_sociales) $b[] = 'Redes Sociales';
+                        
+                        foreach($record->appsExentas as $app) {
+                            $b[] = $app->nombre_app;
+                        }
+
                         return empty($b) ? 'Solo Servicios Base' : implode(', ', $b);
                     })
                     ->badge()

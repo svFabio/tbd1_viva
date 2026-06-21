@@ -10,4 +10,9 @@ class Paquete extends Model
     protected $primaryKey = 'id_paquete';
     public $timestamps = false;
     protected $guarded = [];
+
+    public function appsExentas()
+    {
+        return $this->hasMany(AppExentaEnBolsa::class, 'id_paquete', 'id_paquete');
+    }
 }

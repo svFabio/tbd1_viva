@@ -50,10 +50,17 @@ class PaqueteResource extends Resource
                     ->label('SMS incluidos')
                     ->numeric()
                     ->default(0),
-                Forms\Components\Toggle::make('whatsapp_ilimitado')
-                    ->label('¿WhatsApp Ilimitado?'),
-                Forms\Components\Toggle::make('redes_sociales')
-                    ->label('¿Redes Sociales Ilimitadas?'),
+                
+                Forms\Components\Repeater::make('appsExentas')
+                    ->relationship()
+                    ->schema([
+                        Forms\Components\TextInput::make('nombre_app')
+                            ->label('Nombre de la App (Ej: WhatsApp, TikTok)')
+                            ->required()
+                            ->maxLength(50),
+                    ])
+                    ->label('Aplicaciones Exentas (Ilimitadas)')
+                    ->addActionLabel('Agregar App'),
             ]);
     }
 
@@ -67,7 +74,10 @@ class PaqueteResource extends Resource
                 Tables\Columns\TextColumn::make('duracion_dias')->sortable(),
                 Tables\Columns\TextColumn::make('megas')->label('MB'),
                 Tables\Columns\TextColumn::make('minutos')->label('Min'),
-                Tables\Columns\IconColumn::make('whatsapp_ilimitado')->boolean(),
+                Tables\Columns\TextColumn::make('appsExentas.nombre_app')
+                    ->label('Apps Exentas')
+                    ->badge()
+                    ->color('success'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -6,18 +6,23 @@ CREATE OR REPLACE FUNCTION seguridad.fn_auditoria_dml()
     RETURNS trigger
     LANGUAGE plpgsql
 AS $function$
+DECLARE
+    v_usuario varchar(50);
 BEGIN
+    -- Capturamos el usuario real (inyectado por Laravel o por DBeaver)
+    v_usuario := COALESCE(current_setting('app.current_web_user', true), CURRENT_USER::text);
+
     IF (TG_OP = 'DELETE') THEN
-        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'DELETE', to_jsonb(OLD)::text);
+        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
+        VALUES (TG_TABLE_NAME, 'DELETE', v_usuario, to_jsonb(OLD)::text);
         RETURN OLD;
     ELSIF (TG_OP = 'UPDATE') THEN
-        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'UPDATE', to_jsonb(NEW)::text);
+        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
+        VALUES (TG_TABLE_NAME, 'UPDATE', v_usuario, to_jsonb(NEW)::text);
         RETURN NEW;
     ELSIF (TG_OP = 'INSERT') THEN
-        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'INSERT', to_jsonb(NEW)::text);
+        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
+        VALUES (TG_TABLE_NAME, 'INSERT', v_usuario, to_jsonb(NEW)::text);
         RETURN NEW;
     END IF;
     RETURN NULL;
@@ -30,11 +35,14 @@ CREATE OR REPLACE FUNCTION seguridad.fn_auditoria_ddl()
 AS $function$
 DECLARE
     obj record;
+    v_usuario varchar(50);
 BEGIN
+    v_usuario := COALESCE(current_setting('app.current_web_user', true), CURRENT_USER::text);
+
     FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands()
     LOOP
-        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, detalle_cambio)
-        VALUES (obj.object_identity, tg_tag, current_query());
+        INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
+        VALUES (obj.object_identity, tg_tag, v_usuario, current_query());
     END LOOP;
 END;
 $function$;

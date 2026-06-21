@@ -72,17 +72,19 @@ class SimuladorTrafico extends Page
                 }
             }
 
-            // Descontar del bolsillo
+            // Descontar del bolsillo (Bolsillo usa enteros, así que redondeamos)
             if ($tipoConsumoDB === 'Datos') {
-                if ($bolsillo->saldo_megas < $cantidadCobrar) {
+                $cobroBolsillo = (int) ceil($cantidadCobrar); // Si gastas 0.2 MB, te cobra 1 MB
+                if ($bolsillo->saldo_megas < $cobroBolsillo) {
                     throw new \Exception("Megas Insuficientes. Intentaste consumir $cantidadCobrar MB pero solo tienes {$bolsillo->saldo_megas} MB.");
                 }
-                $bolsillo->saldo_megas -= $cantidadCobrar;
+                $bolsillo->saldo_megas -= $cobroBolsillo;
             } elseif ($tipoConsumoDB === 'Voz') {
-                if ($bolsillo->saldo_minutos < $cantidadCobrar) {
+                $cobroBolsillo = (int) ceil($cantidadCobrar);
+                if ($bolsillo->saldo_minutos < $cobroBolsillo) {
                     throw new \Exception("Minutos Insuficientes. Necesitas $cantidadCobrar Min pero solo tienes {$bolsillo->saldo_minutos} Min.");
                 }
-                $bolsillo->saldo_minutos -= $cantidadCobrar;
+                $bolsillo->saldo_minutos -= $cobroBolsillo;
             }
 
             $bolsillo->save();

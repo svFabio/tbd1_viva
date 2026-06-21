@@ -237,9 +237,6 @@ REVOKE ALL ON finanzas."Tarjeta_Recarga" FROM rol_auditor;
 --   finanzas:  Tarjeta_Recarga SELECT → NO está en la matriz de reporte
 -- -------------------------------------------------------------
 
-REVOKE ALL ON comercial."Numero_Amigo"    FROM rol_reporte;
-REVOKE ALL ON finanzas."Tarjeta_Recarga"  FROM rol_reporte;
-
 -- =============================================================
 -- ROL: u_admin_web
 -- =============================================================

@@ -41,7 +41,7 @@ class SimuladorTrafico extends Page
             $idBolsaIlimitada = null;
 
             if ($tipoActividad === 'DATOS_GENERAL') {
-                $cantidadCobrar = $segundos * 0.2;
+                $cantidadCobrar = $segundos * 1.0;
                 $mensaje = "Navegaste por $segundos segundos. Consumo: $cantidadCobrar MB.";
             } 
             elseif ($tipoActividad === 'VOZ') {

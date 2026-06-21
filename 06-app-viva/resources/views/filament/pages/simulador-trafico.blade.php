@@ -13,14 +13,14 @@
                     <x-heroicon-o-globe-alt />
                 </div>
                 <h3 class="font-bold text-lg">Navegar por Internet</h3>
-                <p class="text-sm text-gray-500 mb-4">Gasta 0.2 MB por segundo</p>
+                <p class="text-sm text-gray-500 mb-4">Gasta 1 MB por segundo</p>
                 
                 <div x-show="!activo.navegar">
                     <x-filament::button x-on:click="iniciar('navegar')">Iniciar Navegación</x-filament::button>
                 </div>
                 <div x-show="activo.navegar" class="w-full">
                     <div class="text-4xl font-bold text-primary-600 mb-2" x-text="segundos.navegar + ' s'"></div>
-                    <div class="text-lg text-red-500 mb-4" x-text="'-' + (segundos.navegar * 0.2).toFixed(1) + ' MB'"></div>
+                    <div class="text-lg text-red-500 mb-4" x-text="'-' + segundos.navegar + ' MB'"></div>
                     <x-filament::button color="danger" x-on:click="detener('navegar', 'DATOS_GENERAL')">Detener y Cobrar</x-filament::button>
                 </div>
             </div>

@@ -10,7 +10,8 @@ services:
       "-c", "log_statement=ddl",
       "-c", "pgaudit.log=write,ddl",
       "-c", "pgaudit.log_relation=on",
-      "-c", "pgaudit.log_parameter=on"
+      "-c", "pgaudit.log_parameter=on",
+      "-c", "hba_file=/etc/postgresql/pg_hba.conf"
     ]
     environment:
       POSTGRES_USER: postgres
@@ -20,4 +21,11 @@ services:
       - "5433:5432"
     volumes:
       - ./datos_postgres_viva:/var/lib/postgresql/data
-      - ./scripts_iniciales:/docker-entrypoint-initdb.d
+      - ./07-scripts-iniciales:/docker-entrypoint-initdb.d
+      - ./11-configuracion-de-seguridad/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    networks:
+      - red_viva
+
+networks:
+  red_viva:
+    external: true

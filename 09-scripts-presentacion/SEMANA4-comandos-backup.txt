@@ -1,0 +1,90 @@
+=====================================================================
+SEMANA 4: BACKUP Y RESTORE — COMANDOS COMPLETOS PARA PRESENTACIÓN
+Ejecutar desde: azureuser@tbdviva:~$
+=====================================================================
+
+
+═══════════════════════════════════════════════════════════════════
+TIPO 1: BACKUP COMPLETO (estructura + datos)
+═══════════════════════════════════════════════════════════════════
+
+-- GENERAR:
+docker exec -u postgres contenedor-postgres-viva pg_dump -Fc bd-viva -f /tmp/backup_bd_viva.backup
+docker cp contenedor-postgres-viva:/tmp/backup_bd_viva.backup ~/backup_bd_viva.backup
+
+-- RESTAURAR EN BASE NUEVA:
+docker exec -u postgres contenedor-postgres-viva dropdb --if-exists bd-viva-restore
+docker exec -u postgres contenedor-postgres-viva createdb bd-viva-restore
+docker exec -u postgres contenedor-postgres-viva pg_restore -d bd-viva-restore /tmp/backup_bd_viva.backup
+
+-- VERIFICAR (tablas + filas con datos):
+docker exec -u postgres contenedor-postgres-viva psql -d bd-viva-restore -c "
+SELECT 'Persona_Natural' AS tabla, COUNT(*) AS filas FROM clientes.\"Persona_Natural\"
+UNION ALL SELECT 'Factura', COUNT(*) FROM finanzas.\"Factura\"
+UNION ALL SELECT 'Linea', COUNT(*) FROM lineas.\"Linea\";"
+
+-- RESULTADO ESPERADO: filas > 0 en todas las tablas
+
+
+═══════════════════════════════════════════════════════════════════
+TIPO 2: BACKUP SOLO ESTRUCTURA (solo DDL, sin datos)
+═══════════════════════════════════════════════════════════════════
+
+-- GENERAR:
+docker exec -u postgres contenedor-postgres-viva pg_dump -Fc -s bd-viva -f /tmp/backup_estructura.backup
+docker cp contenedor-postgres-viva:/tmp/backup_estructura.backup ~/backup_estructura.backup
+
+-- RESTAURAR EN BASE NUEVA:
+docker exec -u postgres contenedor-postgres-viva dropdb --if-exists bd-viva-estructura
+docker exec -u postgres contenedor-postgres-viva createdb bd-viva-estructura
+docker exec -u postgres contenedor-postgres-viva pg_restore -d bd-viva-estructura /tmp/backup_estructura.backup
+
+-- VERIFICAR (tablas existen pero con 0 filas = solo estructura):
+docker exec -u postgres contenedor-postgres-viva psql -d bd-viva-estructura -c "
+SELECT 'Persona_Natural' AS tabla, COUNT(*) AS filas FROM clientes.\"Persona_Natural\"
+UNION ALL SELECT 'Factura', COUNT(*) FROM finanzas.\"Factura\"
+UNION ALL SELECT 'Linea', COUNT(*) FROM lineas.\"Linea\";"
+
+-- RESULTADO ESPERADO: 0 filas en todas las tablas
+
+
+═══════════════════════════════════════════════════════════════════
+TIPO 3: BACKUP SOLO DATOS (sin estructura, solo filas)
+═══════════════════════════════════════════════════════════════════
+
+-- GENERAR:
+docker exec -u postgres contenedor-postgres-viva pg_dump -Fc -a bd-viva -f /tmp/backup_datos.backup
+docker cp contenedor-postgres-viva:/tmp/backup_datos.backup ~/backup_datos.backup
+
+-- RESTAURAR: necesita estructura previa, usamos bd-viva-estructura que ya tiene las tablas vacías
+docker exec -u postgres contenedor-postgres-viva pg_restore -d bd-viva-estructura /tmp/backup_datos.backup
+
+-- VERIFICAR (ahora bd-viva-estructura tiene estructura + datos inyectados):
+docker exec -u postgres contenedor-postgres-viva psql -d bd-viva-estructura -c "
+SELECT 'Persona_Natural' AS tabla, COUNT(*) AS filas FROM clientes.\"Persona_Natural\"
+UNION ALL SELECT 'Factura', COUNT(*) FROM finanzas.\"Factura\"
+UNION ALL SELECT 'Linea', COUNT(*) FROM lineas.\"Linea\";"
+
+-- RESULTADO ESPERADO: filas > 0 (los datos fueron inyectados sobre la estructura vacía)
+
+
+═══════════════════════════════════════════════════════════════════
+VER LOS 3 ARCHIVOS DE BACKUP
+═══════════════════════════════════════════════════════════════════
+
+ls -lh ~/backup*.backup
+
+-- RESULTADO ESPERADO:
+-- backup_bd_viva.backup     ~110K  (estructura + datos)
+-- backup_estructura.backup  ~30K   (solo DDL)
+-- backup_datos.backup       ~27K   (solo filas)
+
+
+=====================================================================
+ARGUMENTO VERBAL PARA EL INGENIERO:
+"Implementamos tres estrategias de backup con pg_dump:
+ 1. Completo (-Fc): estructura + datos. Para recuperación total ante fallo.
+ 2. Solo estructura (-Fc -s): el DDL. Para recrear el esquema en nuevo servidor.
+ 3. Solo datos (-Fc -a): las filas. Para migrar datos entre entornos con misma estructura.
+ La restauración se realiza con pg_restore. Validamos contando filas en tablas clave."
+=====================================================================

@@ -24,37 +24,10 @@ class SimuladorTrafico extends Page
         return auth()->user()->id_cliente !== null;
     }
 
-    protected function getHeaderActions(): array
+    public function procesarTrafico($tipoActividad, $segundos)
     {
-        return [
-            Action::make('navegar')
-                ->label('Navegar por Internet (Gasta 50 MB)')
-                ->color('primary')
-                ->icon('heroicon-o-globe-alt')
-                ->action(fn () => $this->simularConsumo('Datos', 50, 'Navegaste por internet viendo memes.')),
-                
-            Action::make('llamar')
-                ->label('Llamar a tu mamá (Gasta 5 Min)')
-                ->color('success')
-                ->icon('heroicon-o-phone')
-                ->action(fn () => $this->simularConsumo('Voz', 5, 'Llamaste a tu mamá. ¡Qué buen hijo!')),
+        if ($segundos <= 0) return;
 
-            Action::make('whatsapp')
-                ->label('Mandar WhatsApp')
-                ->color('success')
-                ->icon('heroicon-o-chat-bubble-left-right')
-                ->action(fn () => $this->simularApp('WhatsApp', 10)),
-
-            Action::make('tiktok')
-                ->label('Ver videos en TikTok')
-                ->color('danger')
-                ->icon('heroicon-o-video-camera')
-                ->action(fn () => $this->simularApp('TikTok', 100)),
-        ];
-    }
-
-    private function simularConsumo($tipo, $cantidad, $mensajeExito)
-    {
         $user = auth()->user();
         $linea = Linea::where('id_cliente', $user->id_cliente)->first();
         if (!$linea) return;
@@ -62,71 +35,73 @@ class SimuladorTrafico extends Page
         DB::beginTransaction();
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
+            $cantidadCobrar = 0;
+            $tipoConsumoDB = 'Datos';
+            $mensaje = "";
+            $idBolsaIlimitada = null;
 
-            if ($tipo === 'Datos') {
-                if ($bolsillo->saldo_megas < $cantidad) {
-                    throw new \Exception("No tienes suficientes Megas. Te faltan " . ($cantidad - $bolsillo->saldo_megas) . " MB.");
+            if ($tipoActividad === 'DATOS_GENERAL') {
+                $cantidadCobrar = $segundos * 0.2;
+                $mensaje = "Navegaste por $segundos segundos. Consumo: $cantidadCobrar MB.";
+            } 
+            elseif ($tipoActividad === 'VOZ') {
+                $tipoConsumoDB = 'Voz';
+                $cantidadCobrar = $segundos * 1; // 1 min por segundo simulado
+                $mensaje = "Llamaste por $segundos min simulados.";
+            } 
+            elseif (in_array($tipoActividad, ['APP_WHATSAPP', 'APP_TIKTOK'])) {
+                $nombreApp = ($tipoActividad === 'APP_WHATSAPP') ? 'WhatsApp' : 'TikTok';
+                $tasaPorSegundo = ($tipoActividad === 'APP_WHATSAPP') ? 0.1 : 1.0;
+                
+                // Verificar bolsa ilimitada
+                $bolsaActiva = DB::table('servicios.Bolsa_Activa')
+                    ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                    ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                    ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
+                    ->select('servicios.Bolsa_Activa.id_bolsa_activa')
+                    ->first();
+
+                if ($bolsaActiva) {
+                    $cantidadCobrar = 0;
+                    $idBolsaIlimitada = $bolsaActiva->id_bolsa_activa;
+                    $mensaje = "Usaste $nombreApp por $segundos segundos. ¡Te salió 100% GRATIS!";
+                } else {
+                    $cantidadCobrar = $segundos * $tasaPorSegundo;
+                    $mensaje = "Usaste $nombreApp sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
                 }
-                $bolsillo->saldo_megas -= $cantidad;
-            } elseif ($tipo === 'Voz') {
-                if ($bolsillo->saldo_minutos < $cantidad) {
-                    throw new \Exception("No tienes suficientes Minutos. Te faltan " . ($cantidad - $bolsillo->saldo_minutos) . " Min.");
+            }
+
+            // Descontar del bolsillo
+            if ($tipoConsumoDB === 'Datos') {
+                if ($bolsillo->saldo_megas < $cantidadCobrar) {
+                    throw new \Exception("Megas Insuficientes. Intentaste consumir $cantidadCobrar MB pero solo tienes {$bolsillo->saldo_megas} MB.");
                 }
-                $bolsillo->saldo_minutos -= $cantidad;
+                $bolsillo->saldo_megas -= $cantidadCobrar;
+            } elseif ($tipoConsumoDB === 'Voz') {
+                if ($bolsillo->saldo_minutos < $cantidadCobrar) {
+                    throw new \Exception("Minutos Insuficientes. Necesitas $cantidadCobrar Min pero solo tienes {$bolsillo->saldo_minutos} Min.");
+                }
+                $bolsillo->saldo_minutos -= $cantidadCobrar;
             }
 
             $bolsillo->save();
 
+            // Registrar en tabla Consumo
             DB::table('servicios.Consumo')->insert([
                 'id_linea' => $linea->id_linea,
-                'tipo_consumo' => $tipo,
-                'cantidad' => $cantidad,
+                'tipo_consumo' => $tipoConsumoDB,
+                'cantidad' => $cantidadCobrar,
+                'id_bolsa_activa' => $idBolsaIlimitada,
                 'fecha_consumo' => Carbon::now()
             ]);
 
             DB::commit();
-
-            Notification::make()->title('Éxito')->body($mensajeExito)->success()->send();
+            Notification::make()->title('Consumo Registrado')->body($mensaje)->success()->send();
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Notification::make()->title('Saldo Insuficiente')->body($e->getMessage())->danger()->send();
-        }
-    }
-
-    private function simularApp($nombreApp, $megasSiNoEsGratis)
-    {
-        $user = auth()->user();
-        $linea = Linea::where('id_cliente', $user->id_cliente)->first();
-        if (!$linea) return;
-
-        // 1. Verificamos si tiene la App Ilimitada activa
-        $bolsaActiva = DB::table('servicios.Bolsa_Activa')
-            ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
-            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
-            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
-            ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
-            ->select('servicios.Bolsa_Activa.id_bolsa_activa')
-            ->first();
-
-        if ($bolsaActiva) {
-            // Tiene la app ilimitada
-            DB::table('servicios.Consumo')->insert([
-                'id_linea' => $linea->id_linea,
-                'tipo_consumo' => 'Datos',
-                'cantidad' => 0,
-                'id_bolsa_activa' => $bolsaActiva->id_bolsa_activa,
-                'fecha_consumo' => Carbon::now()
-            ]);
-
-            Notification::make()
-                ->title('¡Ilimitado!')
-                ->body("Usaste $nombreApp gratis gracias a tu paquete activo.")
-                ->success()
-                ->send();
-        } else {
-            // No tiene la app ilimitada, le cobramos megas normales
-            $this->simularConsumo('Datos', $megasSiNoEsGratis, "Usaste $nombreApp pero NO lo tienes ilimitado. Te descontamos $megasSiNoEsGratis MB.");
+            Notification::make()->title('Tráfico Detenido')->body($e->getMessage())->danger()->send();
         }
     }
 }

@@ -9,7 +9,9 @@
             
             <!-- Navegación -->
             <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <x-heroicon-o-globe-alt class="w-12 h-12 text-primary-500 mb-2"/>
+                <div style="width: 48px; height: 48px;" class="mb-2 text-primary-500">
+                    <x-heroicon-o-globe-alt />
+                </div>
                 <h3 class="font-bold text-lg">Navegar por Internet</h3>
                 <p class="text-sm text-gray-500 mb-4">Gasta 0.2 MB por segundo</p>
                 
@@ -25,7 +27,9 @@
 
             <!-- Llamadas -->
             <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <x-heroicon-o-phone class="w-12 h-12 text-success-500 mb-2"/>
+                <div style="width: 48px; height: 48px;" class="mb-2 text-success-500">
+                    <x-heroicon-o-phone />
+                </div>
                 <h3 class="font-bold text-lg">Llamada de Voz</h3>
                 <p class="text-sm text-gray-500 mb-4">Simulador: 1 Minuto gastado por segundo real</p>
                 
@@ -41,7 +45,9 @@
 
             <!-- WhatsApp -->
             <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <x-heroicon-o-chat-bubble-left-right class="w-12 h-12 text-green-500 mb-2"/>
+                <div style="width: 48px; height: 48px;" class="mb-2 text-green-500">
+                    <x-heroicon-o-chat-bubble-left-right />
+                </div>
                 <h3 class="font-bold text-lg">Mandar WhatsApp</h3>
                 <p class="text-sm text-gray-500 mb-4">Gasta 0.1 MB por segundo (¡A menos que tengas ilimitado!)</p>
                 
@@ -57,7 +63,9 @@
 
             <!-- TikTok -->
             <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <x-heroicon-o-video-camera class="w-12 h-12 text-gray-900 dark:text-white mb-2"/>
+                <div style="width: 48px; height: 48px;" class="mb-2 text-gray-900 dark:text-white">
+                    <x-heroicon-o-video-camera />
+                </div>
                 <h3 class="font-bold text-lg">Ver TikTok</h3>
                 <p class="text-sm text-gray-500 mb-4">Gasta 1 MB por segundo (¡Muy pesado!)</p>
                 
@@ -94,8 +102,8 @@
                     clearInterval(this.intervalos[clave]);
                     
                     if(this.segundos[clave] > 0) {
-                        // Llamar a la función de PHP en el backend
-                        $wire.procesarTrafico(tipoBackEnd, this.segundos[clave]);
+                        // Llamar a la función de PHP en el backend usando this.$wire
+                        this.$wire.procesarTrafico(tipoBackEnd, this.segundos[clave]);
                     }
                     this.segundos[clave] = 0;
                 }

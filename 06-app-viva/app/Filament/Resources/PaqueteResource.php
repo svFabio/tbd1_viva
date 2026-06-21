@@ -27,7 +27,7 @@ class PaqueteResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('nombre_paquete')
-                    ->label('Nombre del Paquete (Ej: Bolsa 500MB)')
+                    ->label('Nombre del Paquete (Ej: Bolsa WOW 500MB)')
                     ->required()
                     ->maxLength(50),
                 Forms\Components\TextInput::make('costo')
@@ -38,6 +38,29 @@ class PaqueteResource extends Resource
                     ->label('Duración en Días')
                     ->required()
                     ->numeric(),
+                Forms\Components\TextInput::make('megas')
+                    ->label('Megas incluidos')
+                    ->numeric()
+                    ->default(0),
+                Forms\Components\TextInput::make('minutos')
+                    ->label('Minutos incluidos')
+                    ->numeric()
+                    ->default(0),
+                Forms\Components\TextInput::make('sms')
+                    ->label('SMS incluidos')
+                    ->numeric()
+                    ->default(0),
+                
+                Forms\Components\Repeater::make('appsExentas')
+                    ->relationship()
+                    ->schema([
+                        Forms\Components\TextInput::make('nombre_app')
+                            ->label('Nombre de la App (Ej: WhatsApp, TikTok)')
+                            ->required()
+                            ->maxLength(50),
+                    ])
+                    ->label('Aplicaciones Exentas (Ilimitadas)')
+                    ->addActionLabel('Agregar App'),
             ]);
     }
 
@@ -49,6 +72,12 @@ class PaqueteResource extends Resource
                 Tables\Columns\TextColumn::make('nombre_paquete')->searchable(),
                 Tables\Columns\TextColumn::make('costo')->money('BOB')->sortable(),
                 Tables\Columns\TextColumn::make('duracion_dias')->sortable(),
+                Tables\Columns\TextColumn::make('megas')->label('MB'),
+                Tables\Columns\TextColumn::make('minutos')->label('Min'),
+                Tables\Columns\TextColumn::make('appsExentas.nombre_app')
+                    ->label('Apps Exentas')
+                    ->badge()
+                    ->color('success'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

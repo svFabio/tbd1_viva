@@ -27,8 +27,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('mi-viva')
             ->path('mi-viva')
             ->login(\App\Filament\Pages\Auth\Login::class)
+            ->brandName('VIVA Bolivia')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#00a650', // Verde característico de VIVA
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

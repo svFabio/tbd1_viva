@@ -235,6 +235,7 @@ CREATE TABLE finanzas."Bolsillo" (
     saldo_dinero    numeric(10, 2) DEFAULT 0.00 NULL,
     saldo_megas     int4 DEFAULT 0 NULL,
     saldo_minutos   int4 DEFAULT 0 NULL,
+    saldo_sms       int4 DEFAULT 0 NULL,
     CONSTRAINT "Bolsillo_id_linea_key" UNIQUE (id_linea),
     CONSTRAINT "Bolsillo_pkey" PRIMARY KEY (id_bolsillo)
 );

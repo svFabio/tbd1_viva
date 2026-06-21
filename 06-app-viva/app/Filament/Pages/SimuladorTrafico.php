@@ -106,4 +106,52 @@ class SimuladorTrafico extends Page
             Notification::make()->title('Tráfico Detenido')->body($e->getMessage())->danger()->send();
         }
     }
+
+    public function procesarSms($longitudMensaje)
+    {
+        if ($longitudMensaje <= 0) return;
+
+        $user = auth()->user();
+        $linea = Linea::where('id_cliente', $user->id_cliente)->first();
+        if (!$linea) return;
+
+        DB::beginTransaction();
+        try {
+            $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
+            
+            // 1 SMS = 160 caracteres
+            $cantidadSms = (int) ceil($longitudMensaje / 160);
+
+            if ($bolsillo->saldo_sms >= $cantidadSms) {
+                // Descuenta de la bolsa
+                $bolsillo->saldo_sms -= $cantidadSms;
+                $mensaje = "Enviaste un mensaje de $longitudMensaje letras. Te descontamos $cantidadSms SMS de tu paquete.";
+            } else {
+                // Descuenta en dinero
+                $costoEnDinero = $cantidadSms * 0.20;
+                if ($bolsillo->saldo_dinero < $costoEnDinero) {
+                    throw new \Exception("¡Crédito Insuficiente! Necesitas $costoEnDinero Bs para enviar $cantidadSms SMS (no tienes paquete de SMS).");
+                }
+                $bolsillo->saldo_dinero -= $costoEnDinero;
+                $mensaje = "No tienes bolsa de SMS activa. Te cobramos $costoEnDinero Bs por enviar $cantidadSms SMS.";
+            }
+
+            $bolsillo->save();
+
+            // Registrar en tabla Consumo
+            DB::table('servicios.Consumo')->insert([
+                'id_linea' => $linea->id_linea,
+                'tipo_consumo' => 'SMS',
+                'cantidad' => $cantidadSms,
+                'fecha_consumo' => Carbon::now()
+            ]);
+
+            DB::commit();
+            Notification::make()->title('SMS Enviado')->body($mensaje)->success()->send();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Notification::make()->title('Error al enviar SMS')->body($e->getMessage())->danger()->send();
+        }
+    }
 }

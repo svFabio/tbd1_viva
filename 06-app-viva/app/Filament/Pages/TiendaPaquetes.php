@@ -113,6 +113,7 @@ class TiendaPaquetes extends Page implements HasTable
             // 2. Extraer beneficios de las columnas oficiales
             $bolsillo->saldo_megas += $paquete->megas ?? 0;
             $bolsillo->saldo_minutos += $paquete->minutos ?? 0;
+            $bolsillo->saldo_sms += $paquete->sms ?? 0;
             // Ojo: WhatsApp Ilimitado y Redes Sociales Ilimitadas 
             // se manejan lógicamente verificando si el usuario tiene una BolsaActiva vigente.
             

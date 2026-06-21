@@ -49,14 +49,19 @@ class BolsilloWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Megas Disponibles', number_format($bolsillo->saldo_megas) . ' MB')
-                ->description('Para navegar por internet')
-                ->descriptionIcon('heroicon-m-wifi')
-                ->color('info'),
+            Stat::make('Megas Disponibles', number_format($bolsillo->saldo_megas, 0) . ' MB')
+                ->description('Para navegar')
+                ->icon('heroicon-o-globe-alt')
+                ->color('primary'),
+            
+            Stat::make('Minutos Disponibles', number_format($bolsillo->saldo_minutos, 0) . ' Min')
+                ->description('Para llamadas')
+                ->icon('heroicon-o-phone')
+                ->color('success'),
 
-            Stat::make('Minutos Disponibles', number_format($bolsillo->saldo_minutos) . ' Min')
-                ->description('Para llamadas a todas las redes')
-                ->descriptionIcon('heroicon-m-phone')
+            Stat::make('SMS Disponibles', number_format($bolsillo->saldo_sms ?? 0, 0) . ' SMS')
+                ->description('Mensajes de texto')
+                ->icon('heroicon-o-chat-bubble-oval-left-ellipsis')
                 ->color('warning'),
         ];
     }

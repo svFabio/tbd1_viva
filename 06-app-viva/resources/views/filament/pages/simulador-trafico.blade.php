@@ -79,15 +79,37 @@
                 </div>
             </div>
 
+            <!-- Enviar SMS Clásico -->
+            <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center md:col-span-2">
+                <div style="width: 48px; height: 48px;" class="mb-2 text-warning-500">
+                    <x-heroicon-o-chat-bubble-oval-left-ellipsis />
+                </div>
+                <h3 class="font-bold text-lg">Enviar SMS Clásico</h3>
+                <p class="text-sm text-gray-500 mb-4">El costo de la vida real: 1 SMS = 160 letras. Costo por SMS = 0.20 Bs.</p>
+                
+                <div x-show="!activo.sms" class="w-full max-w-2xl mx-auto">
+                    <textarea x-model="mensajeSms" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 shadow-sm mb-2 text-black dark:text-white" rows="3" placeholder="Escribe un mensaje de texto aquí..."></textarea>
+                    <div class="text-sm text-right text-gray-500 mb-4 font-bold">
+                        <span x-text="mensajeSms.length"></span> caracteres = <span x-text="Math.ceil(mensajeSms.length / 160) || 1"></span> SMS
+                    </div>
+                    <x-filament::button color="warning" x-on:click="enviarSms()">Enviar SMS</x-filament::button>
+                </div>
+                <div x-show="activo.sms" class="w-full">
+                    <div class="text-2xl text-warning-500 mb-4 font-bold">¡Mensaje Enviado con éxito!</div>
+                    <x-filament::button color="gray" x-on:click="resetSms()">Enviar otro SMS</x-filament::button>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('simuladorTrafico', () => ({
-                activo: { navegar: false, llamar: false, whatsapp: false, tiktok: false },
+                activo: { navegar: false, llamar: false, whatsapp: false, tiktok: false, sms: false },
                 segundos: { navegar: 0, llamar: 0, whatsapp: 0, tiktok: 0 },
                 intervalos: { navegar: null, llamar: null, whatsapp: null, tiktok: null },
+                mensajeSms: '',
 
                 iniciar(clave) {
                     this.activo[clave] = true;
@@ -102,10 +124,20 @@
                     clearInterval(this.intervalos[clave]);
                     
                     if(this.segundos[clave] > 0) {
-                        // Llamar a la función de PHP en el backend usando this.$wire
                         this.$wire.procesarTrafico(tipoBackEnd, this.segundos[clave]);
                     }
                     this.segundos[clave] = 0;
+                },
+
+                enviarSms() {
+                    if (this.mensajeSms.length === 0) return;
+                    this.activo.sms = true;
+                    this.$wire.procesarSms(this.mensajeSms.length);
+                },
+
+                resetSms() {
+                    this.activo.sms = false;
+                    this.mensajeSms = '';
                 }
             }))
         })

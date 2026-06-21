@@ -1,0 +1,21 @@
+
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_bolsillo": 1, "id_linea": 1, "saldo_dinero": 35.50, "saldo_megas": 0, "saldo_minutos": 0}' WHERE id_auditoria = 1;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_recarga": 1, "id_linea": 1, "monto": 20.00, "id_tarjeta": 1}' WHERE id_auditoria = 2;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_bolsillo": 1, "id_linea": 1, "saldo_dinero": 85.50, "saldo_megas": 0, "saldo_minutos": 0}' WHERE id_auditoria = 3;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_recarga": 2, "id_linea": 1, "monto": 50.00, "id_tarjeta": null}' WHERE id_auditoria = 4;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_factura": 1, "id_linea": 2, "monto_total": 150.00, "estado_pago": "Pagado"}' WHERE id_auditoria = 5;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_prestamo": 1, "id_linea": 1, "monto_prestado": 5.00, "estado_cobro": "Pendiente"}' WHERE id_auditoria = 6;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_bolsillo": 1, "id_linea": 1, "saldo_dinero": 5.00, "saldo_megas": 0, "saldo_minutos": 0}' WHERE id_auditoria = 7;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_promocion": 4, "nombre_promo": "Doble Carga Abril 2026"}' WHERE id_auditoria = 8;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_promocion": 7, "nombre_promo": "Doble Carga Mayo 2026"}' WHERE id_auditoria = 9;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_factura": 10, "id_linea": 26, "monto_total": 1000.00, "estado_pago": "Pagado"}' WHERE id_auditoria = 10;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_factura": 15, "id_linea": 2, "monto_total": 150.00, "estado_pago": "Pagado"}' WHERE id_auditoria = 11;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_linea": 19, "numero_telefono": "60778901", "id_cliente": 19, "estado": "Inactivo"}' WHERE id_auditoria = 12;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_prestamo": 1, "id_linea": 1, "monto_prestado": 5.00, "estado_cobro": "Cobrado"}' WHERE id_auditoria = 13;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_consumo": 1, "id_linea": 1, "tipo_consumo": "Datos", "cantidad": 45.500}' WHERE id_auditoria = 14;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_bolsa_activa": 1, "id_linea": 1, "id_paquete": 3}' WHERE id_auditoria = 15;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_promocion": 2, "nombre_promo": "Recarga Digital 25% Extra", "fecha_fin": "2026-08-24T23:59:59"}' WHERE id_auditoria = 16;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_factura": 25, "id_linea": 26, "monto_total": 1000.00, "estado_pago": "Pagado"}' WHERE id_auditoria = 17;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_linea": 1, "numero_telefono": "60712345", "id_cliente": 1, "estado": "Activo"}' WHERE id_auditoria = 18;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_numero_amigo": 1, "id_linea_origen": 1, "id_linea_destino": 5}' WHERE id_auditoria = 19;
+UPDATE seguridad."Auditoria" SET detalle_cambio = '{"id_transfuzion": 1, "id_linea_origen": 1, "id_linea_destino": 5, "monto_transferido": 10.00}' WHERE id_auditoria = 20;

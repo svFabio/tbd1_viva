@@ -1,0 +1,17 @@
+# Volúmenes Docker (binarios, no versionables)
+datos_postgres_viva/
+datos_postgres_*/
+# Backups binarios
+*.backup
+*.dump
+
+# Logs
+*.log
+
+# Archivos temporales
+*.swp
+*~
+
+# Carpetas de trabajo (ya integradas)
+0001-proyecto-viva-ULTIMATE/
+50-docker/

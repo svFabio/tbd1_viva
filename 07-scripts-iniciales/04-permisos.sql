@@ -177,6 +177,26 @@ GRANT SELECT ON lineas."Plan" TO rol_finanzas;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA finanzas TO rol_finanzas;
 
 -- =============================================================
+-- 6. ROL: rol_agencia
+-- =============================================================
+GRANT USAGE ON SCHEMA clientes, lineas TO rol_agencia;
+
+-- clientes (CRUD completo para crear cuentas)
+GRANT SELECT, INSERT, UPDATE, DELETE ON clientes."Cliente" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON clientes."Empresa" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON clientes."Persona_Natural" TO rol_agencia;
+
+-- lineas (CRUD completo para vender y asignar números/planes)
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Linea" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Plan" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."SIM_Card" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Equipo" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Linea_Postpago" TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Historial_Linea_Equipo" TO rol_agencia;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA clientes, lineas TO rol_agencia;
+
+-- =============================================================
 -- ROL: u_admin_web
 -- =============================================================
 GRANT USAGE ON SCHEMA seguridad TO u_admin_web;

@@ -40,6 +40,9 @@ class SetDatabaseRole
                 } elseif (trim($user->username) === 'u.auditor') {
                     DB::statement("SET ROLE rol_auditor");
                     \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_auditor executed");
+                } elseif (trim($user->username) === 'u.agencia') {
+                    DB::statement("SET ROLE rol_agencia");
+                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_agencia executed");
                 } elseif (trim($user->username) === 'u.finanzas') {
                     DB::statement("SET ROLE rol_finanzas");
                     \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_finanzas executed");

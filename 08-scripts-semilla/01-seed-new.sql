@@ -792,8 +792,9 @@ INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id
 -- usuarios admin sin id_cliente
 (21, 'admin.promo', crypt('AdminPromo!Viva26', gen_salt('bf')), NULL),
 (22, 'u.auditor',   crypt('Audit!Viva2026',    gen_salt('bf')), NULL),
-(23, 'u.finanzas',  crypt('Finanzas!Viva26',   gen_salt('bf')), NULL),
-(24, 'u.reporte',   crypt('Reporte!Viva2026',  gen_salt('bf')), NULL);
+(23, 'u.agencia',   crypt('Agencia!Viva2026',  gen_salt('bf')), NULL),
+(24, 'u.finanzas',  crypt('Finanzas!Viva26',   gen_salt('bf')), NULL),
+(25, 'u.reporte',   crypt('Reporte!Viva2026',  gen_salt('bf')), NULL);
 
 -- Re-habilitar triggers (volver al comportamiento normal)
 SET session_replication_role = DEFAULT;

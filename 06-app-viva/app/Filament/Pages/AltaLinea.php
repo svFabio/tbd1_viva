@@ -18,7 +18,7 @@ class AltaLinea extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
-    protected static ?string $navigationLabel = '🏢 Agencia CRM (Alta)';
+    protected static ?string $navigationLabel = 'Agencia CRM (Alta)';
     protected static ?string $title = 'Simulador Agencia VIVA: Alta de Nuevo Cliente';
     protected static ?string $slug = 'agencia-alta-cliente';
 

@@ -35,7 +35,7 @@ class Login extends BaseLogin
 
     protected function getCredentialsFromFormData(array $data): array
     {
-        $identificador = $data['identificador'];
+        $identificador = trim($data['identificador']);
         $password = $data['password'];
 
         $id_cliente = null;

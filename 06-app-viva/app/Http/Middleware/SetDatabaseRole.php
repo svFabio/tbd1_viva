@@ -71,9 +71,11 @@ class SetDatabaseRole
                 }
 
             } else {
-                \Illuminate\Support\Facades\Log::info("SetDatabaseRole: No user detected in Auth check. Falling back to rol_app");
-                // Visitantes anónimos (Login) se bajan a rol_app por seguridad
-                DB::statement("SET ROLE rol_app");
+                \Illuminate\Support\Facades\Log::info("SetDatabaseRole: No user detected in Auth check. Keeping default u_admin_web role.");
+                // Visitantes anónimos (Pantalla de Login) DEBEN mantener u_admin_web
+                // porque u_admin_web es el único que tiene permiso SELECT en Usuario_Sistema para validar la contraseña.
+                // Si bajamos a rol_app aquí, el login explota con "permission denied".
+                // DB::statement("SET ROLE rol_app");
             }
         }
 

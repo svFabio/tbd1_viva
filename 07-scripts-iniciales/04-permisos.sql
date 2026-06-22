@@ -243,6 +243,7 @@ REVOKE ALL ON finanzas."Tarjeta_Recarga" FROM rol_auditor;
 -- Permiso indispensable para que Laravel pueda hacer el Login (Auth::attempt)
 GRANT USAGE ON SCHEMA seguridad TO u_admin_web;
 GRANT SELECT ON seguridad."Usuario_Sistema" TO u_admin_web;
+GRANT UPDATE (password_hash) ON seguridad."Usuario_Sistema" TO u_admin_web;
 -- =============================================================
 -- PASO FINAL: Reactivar el event trigger
 -- =============================================================

@@ -19,11 +19,49 @@ class AuditoriaResource extends Resource
     
     protected static ?string $navigationGroup = 'Seguridad y Auditoría';
 
+    public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make('Detalles de la Transacción')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('id_auditoria')
+                            ->label('ID de Auditoría'),
+                        \Filament\Infolists\Components\TextEntry::make('fecha')
+                            ->label('Fecha y Hora')
+                            ->dateTime('d/m/Y H:i:s'),
+                        \Filament\Infolists\Components\TextEntry::make('usuario_db')
+                            ->label('Usuario de Red')
+                            ->badge(),
+                        \Filament\Infolists\Components\TextEntry::make('tabla_afectada')
+                            ->label('Tabla Afectada'),
+                        \Filament\Infolists\Components\TextEntry::make('operacion')
+                            ->label('Operación')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'INSERT' => 'success',
+                                'UPDATE' => 'warning',
+                                'DELETE' => 'danger',
+                                default => 'primary',
+                            }),
+                    ])->columns(3),
+
+                \Filament\Infolists\Components\Section::make('Payload (Cambios)')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('detalle_cambio')
+                            ->label('JSON del Cambio')
+                            ->formatStateUsing(fn ($state) => '<pre style="background: #111; padding: 10px; border-radius: 5px; overflow-x: auto;">' . json_encode(json_decode($state), JSON_PRETTY_PRINT) . '</pre>')
+                            ->html()
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // El auditor solo debe ver, no editar
+                // El auditor solo debe ver, no editar. La vista la maneja infolist() arriba.
             ]);
     }
 

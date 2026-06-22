@@ -19,6 +19,12 @@ class AuditoriaResource extends Resource
     
     protected static ?string $navigationGroup = 'Seguridad y Auditoría';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->username, ['u.auditor', 'admin.promo', 'u.admin']);
+    }
+
     public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
     {
         return $infolist

@@ -44,7 +44,7 @@ BEGIN
     FOR obj IN SELECT * FROM pg_event_trigger_ddl_commands()
     LOOP
         INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
-        VALUES (obj.object_identity, tg_tag, v_usuario, current_query());
+        VALUES (COALESCE(obj.object_identity, 'Operación de DB'), tg_tag, v_usuario, current_query());
     END LOOP;
 END;
 $function$;

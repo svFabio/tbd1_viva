@@ -20,8 +20,15 @@ class SetDatabaseRole
         // para poder bajar los privilegios dinámicamente.
         if (config('database.connections.pgsql.username') === 'postgres') {
             
-            if (auth()->check()) {
+            // Intentar obtener el usuario de múltiples formas (por si usa guard custom de Filament)
+            $user = null;
+            if (class_exists(\Filament\Facades\Filament::class) && \Filament\Facades\Filament::auth()->check()) {
+                $user = \Filament\Facades\Filament::auth()->user();
+            } elseif (auth()->check()) {
                 $user = auth()->user();
+            }
+
+            if ($user) {
                 
                 // Mapeo dinámico de Usuario Web a Rol de Base de Datos
                 if ($user->username === 'admin.promo') {

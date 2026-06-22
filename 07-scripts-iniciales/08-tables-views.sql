@@ -13,7 +13,7 @@ FROM lineas."Linea"
 WHERE estado = 'Activo';
 
 -- 2. Le damos permiso EXCLUSIVO de lectura al rol de promociones
-GRANT SELECT ON comercial.vista_lineas_marketing TO rol_admin_promo;
+GRANT SELECT ON comercial.vista_lineas_marketing TO rol_comercial;
 
 -- ==============================================================================
 -- SCRIPT: 13-crear-vista-normal.sql

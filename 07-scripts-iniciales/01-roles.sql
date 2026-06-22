@@ -1,6 +1,6 @@
 -- 1. PLANTILLAS BASE (Roles genéricos que agrupan los permisos)
 CREATE ROLE rol_app          NOLOGIN NOINHERIT;
-CREATE ROLE rol_admin_promo  NOLOGIN NOINHERIT;
+CREATE ROLE rol_comercial  NOLOGIN NOINHERIT;
 CREATE ROLE rol_auditor      NOLOGIN NOINHERIT BYPASSRLS;
 CREATE ROLE rol_reporte      NOLOGIN NOINHERIT;
 CREATE ROLE rol_finanzas     NOLOGIN NOINHERIT;
@@ -12,7 +12,7 @@ CREATE USER u_app              WITH PASSWORD 'app123'      INHERIT IN ROLE rol_a
 
 -- Usuarios humanos con nombres reales usando guiones bajos
 CREATE USER u_rebeca_jones     WITH PASSWORD 'reporte123'  VALID UNTIL '2026-12-31' INHERIT IN ROLE rol_reporte;
-CREATE USER u_adan_pereira     WITH PASSWORD 'promo123'    VALID UNTIL '2026-12-31' INHERIT IN ROLE rol_admin_promo;
+CREATE USER u_adan_pereira     WITH PASSWORD 'comercial123'    VALID UNTIL '2026-12-31' INHERIT IN ROLE rol_comercial;
 CREATE USER u_aurelio_casillas WITH PASSWORD 'auditor123'  VALID UNTIL '2026-12-31' BYPASSRLS INHERIT IN ROLE rol_auditor;
 CREATE USER u_finn_almanza     WITH PASSWORD 'finanzas123' VALID UNTIL '2026-09-15' INHERIT IN ROLE rol_finanzas;
 CREATE USER u_carlos_agencia   WITH PASSWORD 'agencia123'  VALID UNTIL '2026-12-31' INHERIT IN ROLE rol_agencia;
@@ -24,7 +24,7 @@ CREATE USER u_carlos_agencia   WITH PASSWORD 'agencia123'  VALID UNTIL '2026-12-
 -- Su único poder es poder hacer "SET ROLE" hacia los roles administrativos.
 CREATE USER u_admin_web WITH PASSWORD 'AdminWeb!2026' NOINHERIT;
 
-GRANT rol_admin_promo TO u_admin_web;
+GRANT rol_comercial TO u_admin_web;
 GRANT rol_auditor TO u_admin_web;
 GRANT rol_reporte TO u_admin_web;
 GRANT rol_finanzas TO u_admin_web;

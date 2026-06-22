@@ -46,7 +46,7 @@ CREATE TABLE clientes."Cliente" (
 ALTER TABLE clientes."Cliente" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE clientes."Cliente" TO postgres;
 GRANT INSERT, SELECT, UPDATE ON TABLE clientes."Cliente" TO rol_app;
-GRANT SELECT ON TABLE clientes."Cliente" TO rol_admin_promo;
+GRANT SELECT ON TABLE clientes."Cliente" TO rol_comercial;
 GRANT SELECT ON TABLE clientes."Cliente" TO rol_reporte;
 
 
@@ -64,7 +64,7 @@ CREATE TABLE clientes."Empresa" (
 ALTER TABLE clientes."Empresa" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE clientes."Empresa" TO postgres;
 GRANT INSERT, SELECT, UPDATE ON TABLE clientes."Empresa" TO rol_app;
-GRANT SELECT ON TABLE clientes."Empresa" TO rol_admin_promo;
+GRANT SELECT ON TABLE clientes."Empresa" TO rol_comercial;
 GRANT SELECT ON TABLE clientes."Empresa" TO rol_reporte;
 
 
@@ -83,13 +83,13 @@ CREATE TABLE clientes."Persona_Natural" (
 ALTER TABLE clientes."Persona_Natural" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE clientes."Persona_Natural" TO postgres;
 GRANT INSERT, SELECT, UPDATE ON TABLE clientes."Persona_Natural" TO rol_app;
-GRANT SELECT ON TABLE clientes."Persona_Natural" TO rol_admin_promo;
+GRANT SELECT ON TABLE clientes."Persona_Natural" TO rol_comercial;
 GRANT SELECT ON TABLE clientes."Persona_Natural" TO rol_reporte;
 
 -- Permisos de esquema
 GRANT ALL ON SCHEMA clientes TO postgres;
 GRANT USAGE ON SCHEMA clientes TO rol_app;
-GRANT USAGE ON SCHEMA clientes TO rol_admin_promo;
+GRANT USAGE ON SCHEMA clientes TO rol_comercial;
 GRANT USAGE ON SCHEMA clientes TO rol_reporte;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA clientes TO rol_app;
 
@@ -109,7 +109,7 @@ CREATE TABLE comercial."Promocion" (
 
 ALTER TABLE comercial."Promocion" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE comercial."Promocion" TO postgres;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion" TO rol_admin_promo;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion" TO rol_comercial;
 GRANT SELECT ON TABLE comercial."Promocion" TO rol_reporte;
 
 
@@ -123,7 +123,7 @@ CREATE TABLE comercial."Condicion_Promocion" (
 
 ALTER TABLE comercial."Condicion_Promocion" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE comercial."Condicion_Promocion" TO postgres;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Condicion_Promocion" TO rol_admin_promo;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Condicion_Promocion" TO rol_comercial;
 GRANT SELECT ON TABLE comercial."Condicion_Promocion" TO rol_reporte;
 
 
@@ -138,7 +138,7 @@ CREATE TABLE comercial."Numero_Amigo" (
 
 ALTER TABLE comercial."Numero_Amigo" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE comercial."Numero_Amigo" TO postgres;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Numero_Amigo" TO rol_admin_promo;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Numero_Amigo" TO rol_comercial;
 GRANT SELECT ON TABLE comercial."Numero_Amigo" TO rol_reporte;
 
 
@@ -154,14 +154,14 @@ CREATE TABLE comercial."Promocion_Linea" (
 
 ALTER TABLE comercial."Promocion_Linea" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE comercial."Promocion_Linea" TO postgres;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion_Linea" TO rol_admin_promo;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion_Linea" TO rol_comercial;
 GRANT SELECT ON TABLE comercial."Promocion_Linea" TO rol_reporte;
 
 -- Permisos de esquema
 GRANT ALL ON SCHEMA comercial TO postgres;
-GRANT USAGE ON SCHEMA comercial TO rol_admin_promo;
+GRANT USAGE ON SCHEMA comercial TO rol_comercial;
 GRANT USAGE ON SCHEMA comercial TO rol_reporte;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA comercial TO rol_admin_promo;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA comercial TO rol_comercial;
 
 
 -- =============================================================
@@ -177,7 +177,7 @@ CREATE TABLE fidelizacion."Condicion_Puntos" (
 
 ALTER TABLE fidelizacion."Condicion_Puntos" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE fidelizacion."Condicion_Puntos" TO postgres;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE fidelizacion."Condicion_Puntos" TO rol_admin_promo;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE fidelizacion."Condicion_Puntos" TO rol_comercial;
 GRANT SELECT ON TABLE fidelizacion."Condicion_Puntos" TO rol_reporte;
 GRANT SELECT ON TABLE fidelizacion."Condicion_Puntos" TO rol_auditor;
 
@@ -196,7 +196,7 @@ CREATE TABLE fidelizacion."Historial_Puntos" (
 
 ALTER TABLE fidelizacion."Historial_Puntos" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE fidelizacion."Historial_Puntos" TO postgres;
-GRANT INSERT, SELECT, UPDATE ON TABLE fidelizacion."Historial_Puntos" TO rol_admin_promo;
+GRANT INSERT, SELECT, UPDATE ON TABLE fidelizacion."Historial_Puntos" TO rol_comercial;
 GRANT SELECT ON TABLE fidelizacion."Historial_Puntos" TO rol_reporte;
 GRANT SELECT ON TABLE fidelizacion."Historial_Puntos" TO rol_auditor;
 
@@ -212,16 +212,16 @@ CREATE TABLE fidelizacion."Puntos_Bonus" (
 
 ALTER TABLE fidelizacion."Puntos_Bonus" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE fidelizacion."Puntos_Bonus" TO postgres;
-GRANT INSERT, SELECT, UPDATE ON TABLE fidelizacion."Puntos_Bonus" TO rol_admin_promo;
+GRANT INSERT, SELECT, UPDATE ON TABLE fidelizacion."Puntos_Bonus" TO rol_comercial;
 GRANT SELECT ON TABLE fidelizacion."Puntos_Bonus" TO rol_reporte;
 GRANT SELECT ON TABLE fidelizacion."Puntos_Bonus" TO rol_auditor;
 
 -- Permisos de esquema
 GRANT ALL ON SCHEMA fidelizacion TO postgres;
-GRANT USAGE ON SCHEMA fidelizacion TO rol_admin_promo;
+GRANT USAGE ON SCHEMA fidelizacion TO rol_comercial;
 GRANT USAGE ON SCHEMA fidelizacion TO rol_reporte;
 GRANT USAGE ON SCHEMA fidelizacion TO rol_auditor;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA fidelizacion TO rol_admin_promo;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA fidelizacion TO rol_comercial;
 
 
 -- =============================================================

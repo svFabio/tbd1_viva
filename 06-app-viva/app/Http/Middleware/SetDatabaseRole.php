@@ -34,9 +34,9 @@ class SetDatabaseRole
                 \Illuminate\Support\Facades\Log::info("SetDatabaseRole: Logged in user detected. Username is: '{$user->username}'");
 
                 // Mapeo dinámico de Usuario Web a Rol de Base de Datos
-                if (trim($user->username) === 'admin.promo') {
-                    DB::statement("SET ROLE rol_admin_promo");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_admin_promo executed");
+                if (trim($user->username) === 'u.comercial') {
+                    DB::statement("SET ROLE rol_comercial");
+                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_comercial executed");
                 } elseif (trim($user->username) === 'u.auditor') {
                     DB::statement("SET ROLE rol_auditor");
                     \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_auditor executed");

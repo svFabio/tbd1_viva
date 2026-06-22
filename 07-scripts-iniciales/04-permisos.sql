@@ -5,33 +5,33 @@
 ALTER EVENT TRIGGER trg_audit_ddl DISABLE;
 
 -- =============================================================
--- 1. ROL: rol_admin_promo
+-- 1. ROL: rol_comercial
 -- =============================================================
-GRANT USAGE ON SCHEMA comercial, fidelizacion, clientes, servicios, lineas TO rol_admin_promo;
+GRANT USAGE ON SCHEMA comercial, fidelizacion, clientes, servicios, lineas TO rol_comercial;
 
 -- comercial (CRUD completo)
-GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Promocion" TO rol_admin_promo;
-GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Condicion_Promocion" TO rol_admin_promo;
-GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Numero_Amigo" TO rol_admin_promo;
-GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Promocion_Linea" TO rol_admin_promo;
+GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Promocion" TO rol_comercial;
+GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Condicion_Promocion" TO rol_comercial;
+GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Numero_Amigo" TO rol_comercial;
+GRANT SELECT, INSERT, UPDATE, DELETE ON comercial."Promocion_Linea" TO rol_comercial;
 
 -- fidelizacion
-GRANT SELECT, INSERT, UPDATE, DELETE ON fidelizacion."Condicion_Puntos" TO rol_admin_promo;
-GRANT SELECT ON fidelizacion."Historial_Puntos" TO rol_admin_promo;
-GRANT SELECT ON fidelizacion."Puntos_Bonus" TO rol_admin_promo;
+GRANT SELECT, INSERT, UPDATE, DELETE ON fidelizacion."Condicion_Puntos" TO rol_comercial;
+GRANT SELECT ON fidelizacion."Historial_Puntos" TO rol_comercial;
+GRANT SELECT ON fidelizacion."Puntos_Bonus" TO rol_comercial;
 
 -- clientes
-GRANT SELECT ON clientes."Cliente" TO rol_admin_promo;
+GRANT SELECT ON clientes."Cliente" TO rol_comercial;
 
 -- servicios
-GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."Paquete" TO rol_admin_promo;
-GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."App_Exenta_En_Bolsa" TO rol_admin_promo;
+GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."Paquete" TO rol_comercial;
+GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."App_Exenta_En_Bolsa" TO rol_comercial;
 
 -- lineas
-GRANT SELECT ON lineas."Linea" TO rol_admin_promo;
-GRANT SELECT ON lineas."Plan" TO rol_admin_promo;
+GRANT SELECT ON lineas."Linea" TO rol_comercial;
+GRANT SELECT ON lineas."Plan" TO rol_comercial;
 
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA comercial, fidelizacion, servicios TO rol_admin_promo;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA comercial, fidelizacion, servicios TO rol_comercial;
 
 -- =============================================================
 -- 2. ROL: rol_app

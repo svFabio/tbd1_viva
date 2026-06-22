@@ -87,7 +87,7 @@ class AuditoriaResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'u_adan_pereira', 'u_aurelio_casillas' => 'danger',
-                        'admin.promo', 'u.auditor' => 'success',
+                        'u.comercial', 'u.auditor' => 'success',
                         default => 'warning',
                     })
                     ->searchable(),

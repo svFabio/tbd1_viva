@@ -6,7 +6,7 @@
 -- Por defecto o por una mala creación previa, los roles de grupo estaban 
 -- marcados con "No inheritance". Esto significa que si el usuario 'u_adan_pereira'
 -- iniciaba sesión, sus permisos estaban en blanco y tenía que ejecutar manualmente
--- el comando "SET ROLE rol_admin_promo;" para poder trabajar.
+-- el comando "SET ROLE rol_comercial;" para poder trabajar.
 -- 
 -- Al aplicar "INHERIT", logramos que en el momento en que el usuario inicie sesión, 
 -- herede y cargue AUTOMÁTICAMENTE todos los privilegios del rol al que pertenece,
@@ -14,7 +14,7 @@
 -- ==============================================================================
 
 -- 1. Devolverle la capacidad de herencia a los Roles (Grupos)
-ALTER ROLE rol_admin_promo INHERIT;
+ALTER ROLE rol_comercial INHERIT;
 ALTER ROLE rol_app INHERIT;
 ALTER ROLE rol_auditor INHERIT;
 ALTER ROLE rol_reporte INHERIT;

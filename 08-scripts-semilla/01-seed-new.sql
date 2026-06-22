@@ -790,7 +790,7 @@ INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id
 (19, 'psanjinez',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 20),
 (20, 'kvillanueva', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 21),
 -- usuarios admin sin id_cliente
-(21, 'admin.promo', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
+(21, 'u.comercial', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
 (22, 'u.auditor',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
 (23, 'u.agencia',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
 (24, 'u.finanzas',  '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),

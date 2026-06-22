@@ -19,8 +19,7 @@ class PaqueteResource extends Resource
 
     public static function canAccess(): bool
     {
-        $user = auth()->user();
-        return $user && in_array($user->username, ['admin.promo', 'u.reporte', 'u.finanzas']);
+        return true; // Dejamos pasar al frontend para que la BD lo reviente
     }
 
     public static function form(Form $form): Form

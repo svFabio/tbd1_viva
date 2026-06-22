@@ -22,7 +22,7 @@ class AuditoriaResource extends Resource
     public static function canAccess(): bool
     {
         $user = auth()->user();
-        return $user && in_array($user->username, ['u.auditor', 'admin.promo', 'u.admin']);
+        return $user && in_array($user->username, ['u.auditor']);
     }
 
     public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist

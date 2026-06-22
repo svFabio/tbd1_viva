@@ -22,7 +22,7 @@ class FacturaResource extends Resource
     public static function canAccess(): bool
     {
         $user = auth()->user();
-        return $user && in_array($user->username, ['u.finanzas', 'u.reporte']);
+        return $user && in_array($user->username, ['u.finanzas', 'u.reporte', 'u.auditor']);
     }
 
     public static function form(Form $form): Form

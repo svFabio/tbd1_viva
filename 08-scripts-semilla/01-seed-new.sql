@@ -809,17 +809,17 @@ BEGIN
     FOR row_data IN 
         SELECT table_schema, table_name, column_name 
         FROM information_schema.columns 
-        WHERE column_default LIKE 'nextval(%' 
+        WHERE (column_default LIKE 'nextval(%' OR is_identity = 'YES')
           AND table_schema IN ('clientes', 'comercial', 'fidelizacion', 'finanzas', 'lineas', 'seguridad', 'servicios')
     LOOP
-        -- Obtener el nombre de la secuencia real asociada a la columna
-        seq_name := pg_get_serial_sequence('"' || row_data.table_schema || '"."' || row_data.table_name || '"', row_data.column_name);
+        -- Obtener el nombre de la secuencia real asociada a la columna usando format para manejar comillas
+        seq_name := pg_get_serial_sequence(format('"%s"."%s"', row_data.table_schema, row_data.table_name), row_data.column_name);
         
         IF seq_name IS NOT NULL THEN
             -- Encontrar el ID máximo actual en la tabla
-            EXECUTE 'SELECT COALESCE(MAX("' || row_data.column_name || '"), 0) FROM "' || row_data.table_schema || '"."' || row_data.table_name || '"' INTO max_val;
+            EXECUTE format('SELECT COALESCE(MAX("%I"), 0) FROM "%I"."%I"', row_data.column_name, row_data.table_schema, row_data.table_name) INTO max_val;
             -- Actualizar la secuencia para que empiece desde el MAX + 1
-            EXECUTE 'SELECT setval(''' || seq_name || ''', ' || (max_val + 1) || ', false)';
+            EXECUTE format('SELECT setval(%L, %s, false)', seq_name, max_val + 1);
         END IF;
     END LOOP;
 END $$;

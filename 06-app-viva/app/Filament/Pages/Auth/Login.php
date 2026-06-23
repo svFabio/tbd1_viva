@@ -15,29 +15,41 @@ class Login extends BaseLogin
     {
         return $form
             ->schema([
-                \Filament\Forms\Components\Toggle::make('is_celular')
-                    ->label('Ingresar con número de celular')
-                    ->reactive()
-                    ->default(false),
+                \Filament\Forms\Components\ToggleButtons::make('login_type')
+                    ->label('')
+                    ->options([
+                        'email' => 'Usar Correo/Usuario',
+                        'celular' => 'Usar Celular',
+                    ])
+                    ->icons([
+                        'email' => 'heroicon-o-user',
+                        'celular' => 'heroicon-o-device-phone-mobile',
+                    ])
+                    ->inline()
+                    ->default('email')
+                    ->reactive(),
 
                 \Filament\Forms\Components\TextInput::make('identificador')
                     ->label('Correo Electrónico o Usuario')
                     ->placeholder('correo@empresa.com o u.comercial')
-                    ->required(fn (callable $get) => !$get('is_celular'))
-                    ->hidden(fn (callable $get) => $get('is_celular'))
+                    ->required(fn (callable $get) => $get('login_type') === 'email')
+                    ->hidden(fn (callable $get) => $get('login_type') === 'celular')
                     ->autocomplete('username')
                     ->autofocus(),
 
                 \Filament\Forms\Components\TextInput::make('celular')
                     ->label('Número de Celular')
                     ->placeholder('Ej: 70123456')
-                    ->prefix('🇧🇴 +591')
+                    ->prefix('+591')
+                    ->extraInputAttributes([
+                        'pattern' => '[0-9]*',
+                        'style' => 'background-image: url("https://flagcdn.com/w20/bo.png"); background-repeat: no-repeat; background-position: 12px center; padding-left: 40px;'
+                    ])
                     ->tel()
-                    ->numeric()
                     ->minLength(8)
                     ->maxLength(8)
-                    ->required(fn (callable $get) => $get('is_celular'))
-                    ->hidden(fn (callable $get) => !$get('is_celular')),
+                    ->required(fn (callable $get) => $get('login_type') === 'celular')
+                    ->hidden(fn (callable $get) => $get('login_type') === 'email'),
 
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
@@ -48,7 +60,7 @@ class Login extends BaseLogin
     protected function getCredentialsFromFormData(array $data): array
     {
         $password = $data['password'];
-        $is_celular = $data['is_celular'] ?? false;
+        $is_celular = ($data['login_type'] ?? 'email') === 'celular';
         
         $identificador = '';
         if ($is_celular) {

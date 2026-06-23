@@ -798,3 +798,28 @@ INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id
 
 -- Re-habilitar triggers (volver al comportamiento normal)
 SET session_replication_role = DEFAULT;
+
+-- Sincronizar TODAS las secuencias automáticamente para evitar UniqueConstraintViolationException
+DO $$
+DECLARE
+    row_data RECORD;
+    seq_name TEXT;
+    max_val BIGINT;
+BEGIN
+    FOR row_data IN 
+        SELECT table_schema, table_name, column_name 
+        FROM information_schema.columns 
+        WHERE column_default LIKE 'nextval(%' 
+          AND table_schema IN ('clientes', 'comercial', 'fidelizacion', 'finanzas', 'lineas', 'seguridad', 'servicios')
+    LOOP
+        -- Obtener el nombre de la secuencia real asociada a la columna
+        seq_name := pg_get_serial_sequence('"' || row_data.table_schema || '"."' || row_data.table_name || '"', row_data.column_name);
+        
+        IF seq_name IS NOT NULL THEN
+            -- Encontrar el ID máximo actual en la tabla
+            EXECUTE 'SELECT COALESCE(MAX("' || row_data.column_name || '"), 0) FROM "' || row_data.table_schema || '"."' || row_data.table_name || '"' INTO max_val;
+            -- Actualizar la secuencia para que empiece desde el MAX + 1
+            EXECUTE 'SELECT setval(''' || seq_name || ''', ' || (max_val + 1) || ', false)';
+        END IF;
+    END LOOP;
+END $$;

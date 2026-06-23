@@ -18,14 +18,15 @@ class Login extends BaseLogin
                 \Filament\Forms\Components\ToggleButtons::make('login_type')
                     ->label('')
                     ->options([
-                        'email' => 'Usar Correo/Usuario',
-                        'celular' => 'Usar Celular',
+                        'email' => 'Administrador',
+                        'celular' => 'Cliente VIVA',
                     ])
                     ->icons([
                         'email' => 'heroicon-o-user',
                         'celular' => 'heroicon-o-device-phone-mobile',
                     ])
-                    ->inline()
+                    ->grouped()
+                    ->extraAttributes(['class' => 'flex justify-center'])
                     ->default('email')
                     ->reactive(),
 

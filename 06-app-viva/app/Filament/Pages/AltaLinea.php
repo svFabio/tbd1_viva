@@ -28,8 +28,8 @@ class AltaLinea extends Page implements HasForms
 
     public static function canAccess(): bool
     {
-        // SOLO el usuario de agencia (u.agencia) puede ver y entrar a esta pantalla
-        return auth()->user()?->username === 'u.agencia';
+        // SOLO usuarios con rol_agencia pueden acceder (dinámico, no hardcodeado)
+        return auth()->user()?->rol_db === 'rol_agencia';
     }
 
     public function mount(): void

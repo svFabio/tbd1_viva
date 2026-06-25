@@ -33,27 +33,19 @@ class SetDatabaseRole
                 
                 \Illuminate\Support\Facades\Log::info("SetDatabaseRole: Logged in user detected. Username is: '{$user->username}'");
 
-                // Mapeo dinámico de Usuario Web a Rol de Base de Datos
-                if (trim($user->username) === 'u.comercial') {
-                    DB::statement("SET ROLE rol_comercial");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_comercial executed");
-                } elseif (trim($user->username) === 'u.auditor') {
-                    DB::statement("SET ROLE rol_auditor");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_auditor executed");
-                } elseif (trim($user->username) === 'u.agencia') {
-                    DB::statement("SET ROLE rol_agencia");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_agencia executed");
-                } elseif (trim($user->username) === 'u.finanzas') {
-                    DB::statement("SET ROLE rol_finanzas");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_finanzas executed");
-                } elseif (trim($user->username) === 'u.reporte') {
-                    DB::statement("SET ROLE rol_reporte");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_reporte executed");
-                } else {
-                    // Cliente normal
-                    DB::statement("SET ROLE rol_app");
-                    \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE rol_app executed (fell to else)");
+                // Mapeo DINÁMICO: Leer el rol directamente desde la columna rol_db de la BD.
+                // Esto permite crear nuevos usuarios sin tocar código PHP.
+                // Si el campo no existe (NULL o vacío), se cae a 'rol_app' como seguro por defecto.
+                $rolDb = $user->rol_db ?? 'rol_app';
+
+                // Whitelist de roles válidos para evitar SQL Injection en el SET ROLE
+                $rolesPermitidos = ['rol_app', 'rol_comercial', 'rol_auditor', 'rol_agencia', 'rol_finanzas', 'rol_reporte'];
+                if (!in_array($rolDb, $rolesPermitidos)) {
+                    $rolDb = 'rol_app';
                 }
+
+                DB::statement("SET ROLE {$rolDb}");
+                \Illuminate\Support\Facades\Log::info("SetDatabaseRole: SET ROLE {$rolDb} executed for user '{$user->username}'");
                 
                 // INYECTAR EL USUARIO FÍSICO PARA LA AUDITORÍA
                 DB::statement("SET app.current_web_user = '{$user->username}'");

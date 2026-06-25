@@ -18,7 +18,8 @@ class DashboardReportes extends Page
     public static function canAccess(): bool
     {
         $user = auth()->user();
-        return $user && in_array($user->username, ['u.reporte']);
+        // Dinámico: cualquier usuario con rol_reporte puede acceder, no solo 'u.reporte'
+        return $user && $user->rol_db === 'rol_reporte';
     }
 
     protected function getViewData(): array

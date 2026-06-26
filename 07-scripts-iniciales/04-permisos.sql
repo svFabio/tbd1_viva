@@ -66,6 +66,7 @@ GRANT SELECT, INSERT ON servicios."Consumo" TO rol_app;
 -- comercial
 GRANT SELECT, INSERT, DELETE ON comercial."Numero_Amigo" TO rol_app;
 GRANT SELECT ON comercial."Promocion_Linea" TO rol_app;
+GRANT SELECT ON comercial."Promocion" TO rol_app;
 
 -- fidelizacion
 GRANT SELECT ON fidelizacion."Historial_Puntos" TO rol_app;

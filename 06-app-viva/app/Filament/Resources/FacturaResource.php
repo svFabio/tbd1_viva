@@ -34,15 +34,18 @@ class FacturaResource extends Resource
                         Forms\Components\TextInput::make('id_linea')
                             ->required()
                             ->numeric()
-                            ->label('ID de Línea'),
+                            ->label('ID de Línea')
+                            ->disabled(fn (string $operation): bool => $operation === 'edit'),
                         Forms\Components\DateTimePicker::make('fecha_emision')
                             ->required()
-                            ->label('Fecha de Emisión'),
+                            ->label('Fecha de Emisión')
+                            ->disabled(fn (string $operation): bool => $operation === 'edit'),
                         Forms\Components\TextInput::make('monto_total')
                             ->required()
                             ->numeric()
                             ->prefix('Bs.')
-                            ->label('Monto Total'),
+                            ->label('Monto Total')
+                            ->disabled(fn (string $operation): bool => $operation === 'edit'),
                         Forms\Components\Select::make('estado_pago')
                             ->required()
                             ->options([

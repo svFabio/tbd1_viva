@@ -62,6 +62,32 @@ CREATE TRIGGER trg_audit_dml
     FOR EACH ROW
     EXECUTE FUNCTION seguridad.fn_auditoria_dml();
 
+-- =============================================================
+-- TRIGGER ANTI-FRAUDE EN FACTURAS
+-- =============================================================
+CREATE OR REPLACE FUNCTION finanzas.fn_prevent_fraud_factura()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    IF NEW.monto_total IS DISTINCT FROM OLD.monto_total OR 
+       NEW.id_linea IS DISTINCT FROM OLD.id_linea OR
+       NEW.fecha_emision IS DISTINCT FROM OLD.fecha_emision THEN
+        RAISE EXCEPTION 'FRAUDE DETECTADO: No está permitido modificar el monto, la línea o la fecha de una factura emitida.';
+    END IF;
+    RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_prevent_fraud_factura ON finanzas."Factura";
+
+CREATE TRIGGER trg_prevent_fraud_factura
+    BEFORE UPDATE
+    ON finanzas."Factura"
+    FOR EACH ROW
+    EXECUTE FUNCTION finanzas.fn_prevent_fraud_factura();
+
+
 CREATE EVENT TRIGGER trg_audit_ddl
     ON ddl_command_end
     EXECUTE FUNCTION seguridad.fn_auditoria_ddl();

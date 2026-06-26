@@ -203,4 +203,8 @@ GRANT USAGE ON SCHEMA seguridad TO u_admin_web;
 GRANT SELECT ON seguridad."Usuario_Sistema" TO u_admin_web;
 GRANT UPDATE (password_hash) ON seguridad."Usuario_Sistema" TO u_admin_web;
 
+-- Permisos necesarios para el login por celular:
+GRANT USAGE ON SCHEMA lineas TO u_admin_web;
+GRANT SELECT ON lineas."Linea" TO u_admin_web;
+
 ALTER EVENT TRIGGER trg_audit_ddl ENABLE;

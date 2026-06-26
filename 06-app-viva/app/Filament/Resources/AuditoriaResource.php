@@ -55,7 +55,7 @@ class AuditoriaResource extends Resource
                     ->schema([
                         \Filament\Infolists\Components\TextEntry::make('detalle_cambio')
                             ->label('JSON del Cambio')
-                            ->formatStateUsing(fn ($state) => '<pre style="background: #111; padding: 10px; border-radius: 5px; overflow-x: auto;">' . json_encode(json_decode($state), JSON_PRETTY_PRINT) . '</pre>')
+                            ->formatStateUsing(fn ($state) => '<pre style="background: #111; padding: 10px; border-radius: 5px; overflow-x: auto;">' . json_encode($state, JSON_PRETTY_PRINT) . '</pre>')
                             ->html()
                             ->columnSpanFull(),
                     ]),

@@ -41,34 +41,20 @@ class RecargarSaldo extends Page implements HasForms
     {
         $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
         
-        // Temporalmente usamos el rol admin (postgres) para poder leer la tabla Promocion
-        DB::statement('SET ROLE postgres');
-        $esDiaDobleCarga = (date('j') == 1);
-        try {
-            $esDiaDobleCarga = $esDiaDobleCarga || DB::table('comercial.Promocion')
-                ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
-                ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
-                ->exists();
-        } catch (\Exception $e) {
-            // Ignorar el error de permisos si por alguna razón postgres falla en PDO
-        }
-        // Restauramos el rol del cliente
-        DB::statement("SET ROLE rol_app");
-
+        // Verificamos si el cliente YA usó su bono este mes
+        // (Esto sí podemos consultarlo porque rol_app tiene permisos sobre finanzas.Recarga)
         $yaUsoBono = DB::table('finanzas.Recarga')
             ->where('id_linea', $lineaId)
             ->where('aplicar_bono', true)
             ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
             ->exists();
 
-        $puedeActivarBono = $esDiaDobleCarga && !$yaUsoBono;
-        $mensajeBono = '';
-        if (!$esDiaDobleCarga) {
-            $mensajeBono = 'Hoy no es día de Doble Carga.';
-        } elseif ($yaUsoBono) {
-            $mensajeBono = 'Ya utilizaste tu Doble Carga este mes.';
+        $puedeActivarBono = !$yaUsoBono;
+        
+        if ($yaUsoBono) {
+            $mensajeBono = 'Ya utilizaste tu Doble Carga este mes. Vuelve el próximo mes.';
         } else {
-            $mensajeBono = '¡Tienes disponible tu Doble Carga de este mes!';
+            $mensajeBono = 'Intenta aplicar Doble Carga (Sujeto a días de promoción activa o inicio de mes).';
         }
 
         return $form

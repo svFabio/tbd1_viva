@@ -15,15 +15,15 @@ BEGIN
 
     IF (TG_OP = 'DELETE') THEN
         INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'DELETE', v_usuario, to_jsonb(OLD)::text);
+        VALUES (TG_TABLE_NAME, 'DELETE', v_usuario, row_to_json(OLD)::text);
         RETURN OLD;
     ELSIF (TG_OP = 'UPDATE') THEN
         INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'UPDATE', v_usuario, to_jsonb(NEW)::text);
+        VALUES (TG_TABLE_NAME, 'UPDATE', v_usuario, json_build_object('anterior', row_to_json(OLD), 'nuevo', row_to_json(NEW))::text);
         RETURN NEW;
     ELSIF (TG_OP = 'INSERT') THEN
         INSERT INTO seguridad."Auditoria" (tabla_afectada, operacion, usuario_db, detalle_cambio)
-        VALUES (TG_TABLE_NAME, 'INSERT', v_usuario, to_jsonb(NEW)::text);
+        VALUES (TG_TABLE_NAME, 'INSERT', v_usuario, row_to_json(NEW)::text);
         RETURN NEW;
     END IF;
     RETURN NULL;

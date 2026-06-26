@@ -49,8 +49,8 @@ class RecargarSaldo extends Page implements HasForms
             ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
             ->exists();
 
-        // Usamos la conexión sin middleware para ver las promociones
-        $esDiaDobleCarga = (date('j') == 1) || DB::connection('pgsql_admin')->table('comercial.Promocion')
+        // Usamos la conexión normal, ahora que rol_app tiene permisos sobre Promocion
+        $esDiaDobleCarga = (date('j') == 1) || DB::table('comercial.Promocion')
             ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
             ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
             ->exists();

@@ -13,10 +13,10 @@
 | 1 | Semana 1 — `postgresql.conf` | `listen_addresses = '*'` no tiene justificación válida | 🔴 No conformidad |
 | 2 | Semana 1 — `pg_hba.conf` | Líneas redundantes (IPv4 127.0.0.1 + IPv6 ::1 repiten lo que ya cubren las líneas `local`) | 🟡 Observación |
 | 3 | Semana 1 — `pg_hba.conf` | Línea de `replication` apunta a sí mismo (debería ser al otro host) | 🟡 Observación |
-| 4 | Semana 1 — Roles | Falta el rol de **finanzas/ventas** (solo existen admin_promo, auditor y reporte) | 🔴 No conformidad |
+| 4 | Semana 1 — Roles | Falta el rol de **finanzas/ventas** (solo existen comercial, auditor y reporte) | 🔴 No conformidad |
 | 5 | Semana 2 — Seguridad por columna | No se pudo demostrar EN VIVO que un usuario NO puede ver una columna concreta | 🔴 No conformidad |
 | 6 | Semana 2 — RLS | La demo con `SET app.current_linea_id` es válida pero "forzada"; el evaluador quería ver dos usuarios reales con `SET ROLE` distintos haciendo el mismo `SELECT` y obteniendo filas diferentes | 🟠 Observación grave |
-| 7 | Semana 2 — Vistas seguras | No se demostró que el usuario `rol_admin_promo` NO puede hacer `SELECT` a la **tabla física**, pero SÍ a la **vista** | 🔴 No conformidad |
+| 7 | Semana 2 — Vistas seguras | No se demostró que el usuario `rol_comercial` NO puede hacer `SELECT` a la **tabla física**, pero SÍ a la **vista** | 🔴 No conformidad |
 | 8 | Semana 3 — pgAudit | El evaluador quería ver el **archivo de log de pgAudit** (`.log`), no solo la extensión instalada | 🟡 Observación |
 | 9 | Semana 3 — Trigger DML | Falta demostrar en vivo: ejecutar un `DELETE`/`INSERT`/`UPDATE` y luego mostrar que quedó registrado en la tabla de auditoría | 🟠 Observación grave |
 | 10 | Semana 3 — Sesiones lentas / deadlocks | Se tiene el script de sleep pero no se ejecutó el flujo completo: forzar → detectar → matar | 🟡 Observación |
@@ -88,7 +88,7 @@ Hay una línea de `replication` en `pg_hba.conf` que acepta conexión desde el m
 
 | Rol | Tablas de `finanzas` accesibles | Permisos |
 |-----|--------------------------------|----------|
-| `rol_admin_promo` | Ninguna | — |
+| `rol_comercial` | Ninguna | — |
 | `rol_auditor` | Bolsillo, Factura, Recarga, T_Presta, Transaccion, Transfuzion | SELECT |
 | `rol_reporte` | Bolsillo, Factura, Recarga, T_Presta, Transaccion, Transfuzion | SELECT |
 | `rol_app` *(no nominal)* | Bolsillo, Factura, Recarga, T_Presta, Transaccion, Transfuzion | SELECT + INSERT |
@@ -107,10 +107,10 @@ Las tablas de `finanzas` **si tienen permisos asignados** — `rol_auditor` y `r
 
 ---
 
-### 🟠 Problema 4b — `rol_admin_promo` tiene DELETE en tablas comerciales
+### 🟠 Problema 4b — `rol_comercial` tiene DELETE en tablas comerciales
 
 **Qué dijo el evaluador** (timestamp 00:48:45 — 00:50:04):
-> Discutiendo si `rol_admin_promo` podría borrar una promoción mal configurada, el evaluador dijo:  
+> Discutiendo si `rol_comercial` podría borrar una promoción mal configurada, el evaluador dijo:  
 > *"Hay que evaluar si esta posibilidad es recurrente y va a generar espacio... pero si no hay que manejar estados y el estado de ese [registro] Inactivo o equivocado. Puede que alguien cree una promoción que no debería haber existido jamás. Entonces puede ser inactivado."*
 
 **Lo que el grupo respondió:**  
@@ -120,16 +120,16 @@ Las tablas de `finanzas` **si tienen permisos asignados** — `rol_auditor` y `r
 **Qué hay actualmente en el código** ([`02-ddl-24-05-2026.sql`](file:///e:/9.%20tbd/tbd1_viva/scripts_iniciales/02-ddl-24-05-2026.sql)):
 
 ```sql
--- rol_admin_promo tiene DELETE en todas las tablas del esquema comercial:
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion"           TO rol_admin_promo;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Condicion_Promocion"  TO rol_admin_promo;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Numero_Amigo"         TO rol_admin_promo;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion_Linea"      TO rol_admin_promo;
-GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE fidelizacion."Condicion_Puntos"  TO rol_admin_promo;
+-- rol_comercial tiene DELETE en todas las tablas del esquema comercial:
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion"           TO rol_comercial;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Condicion_Promocion"  TO rol_comercial;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Numero_Amigo"         TO rol_comercial;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE comercial."Promocion_Linea"      TO rol_comercial;
+GRANT INSERT, DELETE, SELECT, UPDATE ON TABLE fidelizacion."Condicion_Puntos"  TO rol_comercial;
 
 -- Además el script 04-permisos.sql agregó DELETE en servicios:
-GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."Paquete"             TO rol_admin_promo;
-GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."App_Exenta_En_Bolsa" TO rol_admin_promo;
+GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."Paquete"             TO rol_comercial;
+GRANT SELECT, INSERT, UPDATE, DELETE ON servicios."App_Exenta_En_Bolsa" TO rol_comercial;
 ```
 
 **Por qué es un problema:**  
@@ -137,19 +137,19 @@ En un sistema de telecomunicaciones real, eliminar una promoción que ya fue asi
 
 **Solución — Argumento verbal para la defensa:**
 
-> *"Reconocemos que otorgar DELETE a `rol_admin_promo` fue una decisión incorrecta. En un entorno de producción, una promoción no se elimina — se desactiva. La tabla `comercial.Promocion` debería tener una columna `estado` (activo/inactivo/error_usuario) y el gestor de promociones solo tendría UPDATE sobre ese campo. Esto además permite que auditoría pueda ver el historial completo de lo que existió."*
+> *"Reconocemos que otorgar DELETE a `rol_comercial` fue una decisión incorrecta. En un entorno de producción, una promoción no se elimina — se desactiva. La tabla `comercial.Promocion` debería tener una columna `estado` (activo/inactivo/error_usuario) y el gestor de promociones solo tendría UPDATE sobre ese campo. Esto además permite que auditoría pueda ver el historial completo de lo que existió."*
 
 **Lo que habría que corregir (mencionar en la defensa, no ejecutar en vivo):**
 
 ```sql
--- Revocar DELETE de las tablas comerciales y de servicios para rol_admin_promo
-REVOKE DELETE ON comercial."Promocion"           FROM rol_admin_promo;
-REVOKE DELETE ON comercial."Condicion_Promocion"  FROM rol_admin_promo;
-REVOKE DELETE ON comercial."Numero_Amigo"         FROM rol_admin_promo;
-REVOKE DELETE ON comercial."Promocion_Linea"      FROM rol_admin_promo;
-REVOKE DELETE ON fidelizacion."Condicion_Puntos"  FROM rol_admin_promo;
-REVOKE DELETE ON servicios."Paquete"              FROM rol_admin_promo;
-REVOKE DELETE ON servicios."App_Exenta_En_Bolsa"  FROM rol_admin_promo;
+-- Revocar DELETE de las tablas comerciales y de servicios para rol_comercial
+REVOKE DELETE ON comercial."Promocion"           FROM rol_comercial;
+REVOKE DELETE ON comercial."Condicion_Promocion"  FROM rol_comercial;
+REVOKE DELETE ON comercial."Numero_Amigo"         FROM rol_comercial;
+REVOKE DELETE ON comercial."Promocion_Linea"      FROM rol_comercial;
+REVOKE DELETE ON fidelizacion."Condicion_Puntos"  FROM rol_comercial;
+REVOKE DELETE ON servicios."Paquete"              FROM rol_comercial;
+REVOKE DELETE ON servicios."App_Exenta_En_Bolsa"  FROM rol_comercial;
 -- El rol quedaría con SELECT, INSERT, UPDATE únicamente.
 -- El "borrado lógico" se hace con UPDATE estado = 'inactivo'.
 ```
@@ -298,9 +298,9 @@ usuario_db varchar(50) DEFAULT CURRENT_USER NULL
 **PREPARACIÓN (Ejecutar como postgres):**
 
 ```sql
--- 1. Dar acceso al esquema y a la tabla al rol_admin_promo
-GRANT USAGE ON SCHEMA seguridad TO rol_admin_promo;
-GRANT SELECT ON seguridad."Auditoria" TO rol_admin_promo;
+-- 1. Dar acceso al esquema y a la tabla al rol_comercial
+GRANT USAGE ON SCHEMA seguridad TO rol_comercial;
+GRANT SELECT ON seguridad."Auditoria" TO rol_comercial;
 
 -- 2. ACTIVAR RLS y crear la política:
 ALTER TABLE seguridad."Auditoria" ENABLE ROW LEVEL SECURITY;
@@ -355,7 +355,7 @@ FROM seguridad."Auditoria";
 > *"Demuéstrame que ese usuario NO tiene acceso a la tabla física, pero SÍ tiene acceso a la vista."*
 
 **Qué pasó:**  
-Se demostró que `rol_admin_promo` puede ver `comercial.vista_lineas_marketing` (script `10-evidencia-table-view.sql`), pero no se demostró que NO puede hacer SELECT a la tabla base que alimenta esa vista.
+Se demostró que `rol_comercial` puede ver `comercial.vista_lineas_marketing` (script `10-evidencia-table-view.sql`), pero no se demostró que NO puede hacer SELECT a la tabla base que alimenta esa vista.
 
 **Solución — Guión de demostración en vivo (Abre 2 terminales):**
 
@@ -368,8 +368,8 @@ Se demostró que `rol_admin_promo` puede ver `comercial.vista_lineas_marketing` 
 ```sql
 -- PASO 1: Asegurar el principio de mínimo privilegio.
 -- Le quitamos el acceso a la tabla física y se lo damos a la vista
-REVOKE SELECT ON lineas."Linea" FROM rol_admin_promo;
-GRANT SELECT ON comercial.vista_lineas_marketing TO rol_admin_promo;
+REVOKE SELECT ON lineas."Linea" FROM rol_comercial;
+GRANT SELECT ON comercial.vista_lineas_marketing TO rol_comercial;
 ```
 
 ```bash
@@ -470,7 +470,7 @@ AFTER INSERT OR UPDATE OR DELETE ON comercial."Promocion"
 FOR EACH ROW EXECUTE FUNCTION seguridad.fn_auditoria_dml();
 
 -- 2. Dar permiso de escritura y crear política RLS para INSERTS
-GRANT INSERT ON seguridad."Auditoria" TO rol_admin_promo;
+GRANT INSERT ON seguridad."Auditoria" TO rol_comercial;
 
 CREATE POLICY auditoria_insert ON seguridad."Auditoria"
   FOR INSERT

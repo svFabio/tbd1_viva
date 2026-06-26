@@ -12,7 +12,7 @@ use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['username', 'password_hash', 'id_cliente'])]
+#[Fillable(['username', 'password_hash', 'id_cliente', 'rol_db'])]
 #[Hidden(['password_hash'])]
 class User extends Authenticatable implements FilamentUser, HasName
 {

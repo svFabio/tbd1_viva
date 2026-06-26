@@ -768,30 +768,76 @@ INSERT INTO seguridad."Auditoria" (id_auditoria, tabla_afectada, operacion, usua
 (19, 'comercial.Numero_Amigo','INSERT','u_app',         '2026-02-01 10:00:00', 'nuevo numero amigo id:1 origen:1 destino:5'),
 (20, 'finanzas.Transfuzion', 'INSERT', 'u_app',         '2026-03-20 12:00:00', 'transfuzion id:1 origen:1 destino:5 monto:10.00');
 
-INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id_cliente) VALUES
-(1,  'jmamani',     crypt('Viva@2026!Juan',    gen_salt('bf')), 1),
-(2,  'mquispe',     crypt('Viva@2026!Maria',   gen_salt('bf')), 2),
-(3,  'pvargas',     crypt('Viva@2026!Pedro',   gen_salt('bf')), 3),
-(4,  'agutierrez',  crypt('Viva@2026!Ana',     gen_salt('bf')), 4),
-(5,  'cmendoza',    crypt('Viva@2026!Carlos',  gen_salt('bf')), 5),
-(6,  'rchoque',     crypt('Viva@2026!Rosa',    gen_salt('bf')), 6),
-(7,  'laguilar',    crypt('Viva@2026!Luis',    gen_salt('bf')), 7),
-(8,  'psalazar',    crypt('Viva@2026!Patri',   gen_salt('bf')), 8),
-(9,  'rnina',       crypt('Viva@2026!Rober',   gen_salt('bf')), 9),
-(10, 'capaza',      crypt('Viva@2026!Carmen',  gen_salt('bf')), 10),
-(11, 'jespinoza',   crypt('Viva@2026!Jorge',   gen_salt('bf')), 11),
-(12, 'svedia',      crypt('Viva@2026!Silvia',  gen_salt('bf')), 12),
-(13, 'oterceros',   crypt('Viva@2026!Oscar',   gen_salt('bf')), 13),
-(14, 'gmontano',    crypt('Viva@2026!Gabi',    gen_salt('bf')), 14),
-(15, 'rpanozo',     crypt('Viva@2026!Rodri',   gen_salt('bf')), 15),
-(16, 'vtorrez',     crypt('Viva@2026!Vale',    gen_salt('bf')), 16),
-(17, 'fcossio',     crypt('Viva@2026!Fer',     gen_salt('bf')), 17),
-(18, 'dheredia',    crypt('Viva@2026!Dani',    gen_salt('bf')), 18),
-(19, 'psanjinez',   crypt('Viva@2026!Paola',   gen_salt('bf')), 20),
-(20, 'kvillanueva', crypt('Viva@2026!Kevin',   gen_salt('bf')), 21),
--- usuarios admin sin id_cliente
-(21, 'admin.promo', crypt('AdminPromo!Viva26', gen_salt('bf')), NULL),
-(22, 'u.auditor',   crypt('Audit!Viva2026',    gen_salt('bf')), NULL);
+INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id_cliente, rol_db) VALUES
+(1,  'jmamani',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 1,  'rol_app'),
+(2,  'mquispe',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 2,  'rol_app'),
+(3,  'pvargas',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 3,  'rol_app'),
+(4,  'agutierrez',       '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 4,  'rol_app'),
+(5,  'cmendoza',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 5,  'rol_app'),
+(6,  'rchoque',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 6,  'rol_app'),
+(7,  'laguilar',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 7,  'rol_app'),
+(8,  'psalazar',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 8,  'rol_app'),
+(9,  'rnina',            '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 9,  'rol_app'),
+(10, 'capaza',           '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 10, 'rol_app'),
+(11, 'jespinoza',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 11, 'rol_app'),
+(12, 'svedia',           '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 12, 'rol_app'),
+(13, 'oterceros',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 13, 'rol_app'),
+(14, 'gmontano',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 14, 'rol_app'),
+(15, 'rpanozo',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 15, 'rol_app'),
+(16, 'vtorrez',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 16, 'rol_app'),
+(17, 'fcossio',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 17, 'rol_app'),
+(18, 'dheredia',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 18, 'rol_app'),
+(19, 'psanjinez',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 20, 'rol_app'),
+(20, 'kvillanueva',      '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 21, 'rol_app'),
+-- Empleados internos VIVA con nombre real (rol admin, sin id_cliente)
+(21, 'adan.pereira',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_comercial'),
+(22, 'aurelio.casillas', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_auditor'),
+(23, 'carlos.agencia',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_agencia'),
+(24, 'finn.almanza',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_finanzas'),
+(25, 'rebeca.jones',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_reporte');
 
 -- Re-habilitar triggers (volver al comportamiento normal)
 SET session_replication_role = DEFAULT;
+
+-- Sincronizar secuencias manualmente de forma infalible (Hardcoded fix para desfase)
+DO $$
+BEGIN
+    PERFORM setval(pg_get_serial_sequence('clientes."Cliente"', 'id_cliente'), (SELECT COALESCE(MAX(id_cliente), 1) FROM clientes."Cliente"));
+    PERFORM setval(pg_get_serial_sequence('clientes."Persona_Natural"', 'id_persona'), (SELECT COALESCE(MAX(id_persona), 1) FROM clientes."Persona_Natural"));
+    PERFORM setval(pg_get_serial_sequence('clientes."Empresa"', 'id_empresa'), (SELECT COALESCE(MAX(id_empresa), 1) FROM clientes."Empresa"));
+    
+    PERFORM setval(pg_get_serial_sequence('lineas."Plan"', 'id_plan'), (SELECT COALESCE(MAX(id_plan), 1) FROM lineas."Plan"));
+    PERFORM setval(pg_get_serial_sequence('lineas."SIM_Card"', 'id_sim'), (SELECT COALESCE(MAX(id_sim), 1) FROM lineas."SIM_Card"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Equipo"', 'id_equipo'), (SELECT COALESCE(MAX(id_equipo), 1) FROM lineas."Equipo"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Linea"', 'id_linea'), (SELECT COALESCE(MAX(id_linea), 1) FROM lineas."Linea"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Linea_Postpago"', 'id_postpago'), (SELECT COALESCE(MAX(id_postpago), 1) FROM lineas."Linea_Postpago"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Historial_Linea_Equipo"', 'id_historial'), (SELECT COALESCE(MAX(id_historial), 1) FROM lineas."Historial_Linea_Equipo"));
+    
+    PERFORM setval(pg_get_serial_sequence('servicios."Paquete"', 'id_paquete'), (SELECT COALESCE(MAX(id_paquete), 1) FROM servicios."Paquete"));
+    PERFORM setval(pg_get_serial_sequence('servicios."App_Exenta_En_Bolsa"', 'id_app'), (SELECT COALESCE(MAX(id_app), 1) FROM servicios."App_Exenta_En_Bolsa"));
+    PERFORM setval(pg_get_serial_sequence('servicios."Bolsa_Activa"', 'id_bolsa_activa'), (SELECT COALESCE(MAX(id_bolsa_activa), 1) FROM servicios."Bolsa_Activa"));
+    PERFORM setval(pg_get_serial_sequence('servicios."Consumo"', 'id_consumo'), (SELECT COALESCE(MAX(id_consumo), 1) FROM servicios."Consumo"));
+    
+    PERFORM setval(pg_get_serial_sequence('finanzas."Tarjeta_Recarga"', 'id_tarjeta'), (SELECT COALESCE(MAX(id_tarjeta), 1) FROM finanzas."Tarjeta_Recarga"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Bolsillo"', 'id_bolsillo'), (SELECT COALESCE(MAX(id_bolsillo), 1) FROM finanzas."Bolsillo"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Recarga"', 'id_recarga'), (SELECT COALESCE(MAX(id_recarga), 1) FROM finanzas."Recarga"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."T_Presta"', 'id_prestamo'), (SELECT COALESCE(MAX(id_prestamo), 1) FROM finanzas."T_Presta"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Factura"', 'id_factura'), (SELECT COALESCE(MAX(id_factura), 1) FROM finanzas."Factura"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Transfuzion"', 'id_transfuzion'), (SELECT COALESCE(MAX(id_transfuzion), 1) FROM finanzas."Transfuzion"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Transaccion"', 'id_transaccion'), (SELECT COALESCE(MAX(id_transaccion), 1) FROM finanzas."Transaccion"));
+    
+    PERFORM setval(pg_get_serial_sequence('comercial."Promocion"', 'id_promocion'), (SELECT COALESCE(MAX(id_promocion), 1) FROM comercial."Promocion"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Condicion_Promocion"', 'id_condicion'), (SELECT COALESCE(MAX(id_condicion), 1) FROM comercial."Condicion_Promocion"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Promocion_Linea"', 'id_promo_linea'), (SELECT COALESCE(MAX(id_promo_linea), 1) FROM comercial."Promocion_Linea"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Numero_Amigo"', 'id_numero_amigo'), (SELECT COALESCE(MAX(id_numero_amigo), 1) FROM comercial."Numero_Amigo"));
+    
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Condicion_Puntos"', 'id_condicion'), (SELECT COALESCE(MAX(id_condicion), 1) FROM fidelizacion."Condicion_Puntos"));
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Puntos_Bonus"', 'id_puntos'), (SELECT COALESCE(MAX(id_puntos), 1) FROM fidelizacion."Puntos_Bonus"));
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Historial_Puntos"', 'id_historial'), (SELECT COALESCE(MAX(id_historial), 1) FROM fidelizacion."Historial_Puntos"));
+    
+    PERFORM setval(pg_get_serial_sequence('seguridad."Auditoria"', 'id_auditoria'), (SELECT COALESCE(MAX(id_auditoria), 1) FROM seguridad."Auditoria"));
+    PERFORM setval(pg_get_serial_sequence('seguridad."Usuario_Sistema"', 'id_usuario'), (SELECT COALESCE(MAX(id_usuario), 1) FROM seguridad."Usuario_Sistema"));
+EXCEPTION WHEN OTHERS THEN
+    -- Si alguna tabla no tiene secuencia o falla, lo ignora de forma silenciosa para que no colapse el docker
+    RAISE NOTICE 'Skipping sequence sync for a table...';
+END $$;

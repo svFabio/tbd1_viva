@@ -17,11 +17,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: tbdviva
       POSTGRES_DB: bd-viva
+      TZ: America/La_Paz
     ports:
       - "5433:5432"
     volumes:
       - ./datos_postgres_viva:/var/lib/postgresql/data
       - ./07-scripts-iniciales:/docker-entrypoint-initdb.d
+      - ./08-scripts-semilla:/seeds
       - ./11-configuracion-de-seguridad/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     networks:
       - red_viva

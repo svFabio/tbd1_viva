@@ -19,7 +19,7 @@ class PaqueteResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->id_cliente === null;
+        return true; // Dejamos pasar al frontend para que la BD lo reviente
     }
 
     public static function form(Form $form): Form

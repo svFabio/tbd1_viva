@@ -9,5 +9,5 @@ SELECT grantee AS rol_evaluado,
        table_name AS tabla,
        privilege_type AS permiso_concedido
 FROM information_schema.role_table_grants
-WHERE grantee = 'rol_admin_promo'  -- <--- CAMBIAR ESTO SEGUN ROL
+WHERE grantee = 'rol_comercial'  -- <--- CAMBIAR ESTO SEGUN ROL
 ORDER BY esquema, tabla, permiso_concedido;

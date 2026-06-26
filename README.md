@@ -75,7 +75,7 @@ docker ps
 ```
 
 El contenedor se llama `contenedor-postgres-viva` y expone PostgreSQL en el puerto `5433`.
-Los scripts de `scripts_iniciales/` se ejecutan automaticamente al crear la base de datos por primera vez gracias al volumen montado en `/docker-entrypoint-initdb.d`.
+Todos los scripts de `scripts_iniciales/` y los datos semilla (`scripts_semilla/`) se ejecutan y sincronizan automáticamente al crear la base de datos por primera vez. **El entorno nace 100% listo, poblado y con sus secuencias correctamente resincronizadas.**
 
 Para ejecutar cualquier script de presentacion desde fuera del contenedor:
 
@@ -194,7 +194,7 @@ host    replication   all   ::1/128           scram-sha-256
 | Rol | Proposito |
 |-----|----------|
 | `rol_app` | Permisos de la aplicacion backend (operaciones transaccionales) |
-| `rol_admin_promo` | Gestion de promociones y fidelizacion |
+| `rol_comercial` | Gestion u.comercialciones y fidelizacion |
 | `rol_auditor` | Solo lectura + auditoria (monitoreo) |
 | `rol_reporte` | Solo lectura en todas las tablas (reportes gerenciales) |
 
@@ -203,7 +203,7 @@ host    replication   all   ::1/128           scram-sha-256
 | Usuario | Rol asignado | Tipo | Vencimiento |
 |---------|-------------|------|-------------|
 | `u_app` | `rol_app` | No Nominal (Sistema) | Sin vencimiento |
-| `u_adan_pereira` | `rol_admin_promo` | Nominal (Persona) | 2026-12-31 |
+| `u_adan_pereira` | `rol_comercial` | Nominal (Persona) | 2026-12-31 |
 | `u_aurelio_casillas` | `rol_auditor` | Nominal (Persona) | 2026-12-31 |
 | `u_rebeca_jones` | `rol_reporte` | Nominal (Persona) | 2026-12-31 |
 
@@ -380,9 +380,9 @@ SELECT numero_telefono, estado
 FROM lineas."Linea"
 WHERE estado = 'Activo';
 
-GRANT SELECT ON comercial.vista_lineas_marketing TO rol_admin_promo;
+GRANT SELECT ON comercial.vista_lineas_marketing TO rol_comercial;
 ```
-- El rol `rol_admin_promo` puede leer la vista pero NO puede hacer `SELECT * FROM lineas."Linea"` directamente.
+- El rol `rol_comercial` puede leer la vista pero NO puede hacer `SELECT * FROM lineas."Linea"` directamente.
 - Se ocultan columnas sensibles como `id_cliente`, `id_sim_activo`, etc.
 
 **Vista 2 -- Facturacion (utilidad operativa):**
@@ -396,7 +396,7 @@ GRANT SELECT ON finanzas.vista_reporte_facturacion TO rol_app;
 ```
 
 **Script de verificacion:**
-- `scripts_presentacion/10-evidencia-table-view.sql` -- Consume la vista de marketing como `rol_admin_promo`.
+- `scripts_presentacion/10-evidencia-table-view.sql` -- Consume la vista de marketing como `rol_comercial`.
 
 ---
 
@@ -417,7 +417,7 @@ Al final del script hay una consulta de verificacion que genera la matriz comple
 SELECT grantee, table_schema, table_name,
        string_agg(privilege_type, ', ' ORDER BY privilege_type) AS privilegios
 FROM information_schema.role_table_grants
-WHERE grantee IN ('rol_admin_promo', 'rol_app', 'rol_auditor', 'rol_reporte')
+WHERE grantee IN ('rol_comercial', 'rol_app', 'rol_auditor', 'rol_reporte')
 GROUP BY grantee, table_schema, table_name
 ORDER BY grantee, table_schema, table_name;
 ```
@@ -739,7 +739,7 @@ docker compose up -d --build # Reconstruir desde cero
 | Rol | Acceso principal | Nivel |
 |-----|-----------------|-------|
 | `rol_app` | Operaciones CRUD del backend | Lectura + escritura limitada |
-| `rol_admin_promo` | Promociones y fidelizacion | CRUD en comercial, lectura en fidelizacion |
+| `rol_comercial` | Promociones y fidelizacion | CRUD en comercial, lectura en fidelizacion |
 | `rol_auditor` | Monitoreo y auditoria | Solo lectura |
 | `rol_reporte` | Reportes gerenciales | Solo lectura |
 

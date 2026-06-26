@@ -64,7 +64,7 @@ class RecargarSaldo extends Page implements HasForms
     public function submit(): void
     {
         $monto = $this->data['monto'];
-        $lineaId = session('current_linea_id', auth()->user()->lineas->first()->id_linea ?? null);
+        $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
 
         if (!$lineaId) {
             Notification::make()->title('Error')->body('No tienes una línea activa seleccionada.')->danger()->send();

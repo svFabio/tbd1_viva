@@ -266,6 +266,12 @@ CREATE POLICY factura_propia_policy ON finanzas."Factura"
     TO rol_app
     USING ((id_linea = (NULLIF(current_setting('app.current_linea_id'::text, true), ''::text))::integer));
 
+CREATE POLICY factura_admin_policy ON finanzas."Factura"
+    AS PERMISSIVE
+    FOR ALL
+    TO rol_finanzas, rol_reporte, rol_auditor
+    USING (true) WITH CHECK (true);
+
 ALTER TABLE finanzas."Factura" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE finanzas."Factura" TO postgres;
 GRANT INSERT, SELECT, UPDATE ON TABLE finanzas."Factura" TO rol_app;
@@ -589,6 +595,12 @@ CREATE POLICY consumo_propio_insert_policy ON servicios."Consumo"
     FOR INSERT
     TO rol_app
     WITH CHECK ((id_linea = (NULLIF(current_setting('app.current_linea_id'::text, true), ''::text))::integer));
+
+CREATE POLICY consumo_admin_policy ON servicios."Consumo"
+    AS PERMISSIVE
+    FOR ALL
+    TO rol_reporte, rol_auditor
+    USING (true) WITH CHECK (true);
 
 ALTER TABLE servicios."Consumo" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE servicios."Consumo" TO postgres;

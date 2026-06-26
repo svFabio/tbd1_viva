@@ -40,7 +40,7 @@ class RecargarSaldo extends Page implements HasForms
     public function form(Form $form): Form
     {
         $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
-        
+
         // Verificamos si el cliente YA usó su bono este mes
         // (Esto sí podemos consultarlo porque rol_app tiene permisos sobre finanzas.Recarga)
         $yaUsoBono = DB::table('finanzas.Recarga')
@@ -49,12 +49,21 @@ class RecargarSaldo extends Page implements HasForms
             ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
             ->exists();
 
-        $puedeActivarBono = !$yaUsoBono;
+        // Usamos la conexión sin middleware para ver las promociones
+        $esDiaDobleCarga = (date('j') == 1) || DB::connection('pgsql_admin')->table('comercial.Promocion')
+            ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
+            ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
+            ->exists();
+
+        $puedeActivarBono = $esDiaDobleCarga && !$yaUsoBono;
         
-        if ($yaUsoBono) {
-            $mensajeBono = 'Ya utilizaste tu Doble Carga este mes. Vuelve el próximo mes.';
+        $mensajeBono = '';
+        if (!$esDiaDobleCarga) {
+            $mensajeBono = 'Hoy no es día de Doble Carga.';
+        } elseif ($yaUsoBono) {
+            $mensajeBono = 'Ya utilizaste tu Doble Carga este mes.';
         } else {
-            $mensajeBono = 'Intenta aplicar Doble Carga (Sujeto a días de promoción activa o inicio de mes).';
+            $mensajeBono = '¡Tienes disponible tu Doble Carga de este mes!';
         }
 
         return $form

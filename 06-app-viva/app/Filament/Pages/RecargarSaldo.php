@@ -41,10 +41,14 @@ class RecargarSaldo extends Page implements HasForms
     {
         $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
         
+        // Temporalmente usamos el rol admin (postgres) para poder leer la tabla Promocion
+        DB::statement('RESET ROLE');
         $esDiaDobleCarga = (date('j') == 1) || DB::table('comercial.Promocion')
             ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
             ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
             ->exists();
+        // Restauramos el rol del cliente
+        DB::statement("SET ROLE rol_app");
 
         $yaUsoBono = DB::table('finanzas.Recarga')
             ->where('id_linea', $lineaId)

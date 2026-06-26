@@ -17,7 +17,6 @@ class Auditoria extends Model
 
     // Castear el JSONB para que Filament lo pueda leer bonito
     protected $casts = [
-        'detalle_cambio' => 'array',
         'fecha' => 'datetime',
     ];
 }

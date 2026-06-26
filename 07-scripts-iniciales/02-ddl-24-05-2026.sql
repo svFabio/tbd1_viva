@@ -584,6 +584,12 @@ CREATE POLICY consumo_propio_policy ON servicios."Consumo"
     TO rol_app
     USING ((id_linea = (NULLIF(current_setting('app.current_linea_id'::text, true), ''::text))::integer));
 
+CREATE POLICY consumo_propio_insert_policy ON servicios."Consumo"
+    AS PERMISSIVE
+    FOR INSERT
+    TO rol_app
+    WITH CHECK ((id_linea = (NULLIF(current_setting('app.current_linea_id'::text, true), ''::text))::integer));
+
 ALTER TABLE servicios."Consumo" OWNER TO postgres;
 GRANT INSERT, TRUNCATE, TRIGGER, DELETE, SELECT, REFERENCES, UPDATE ON TABLE servicios."Consumo" TO postgres;
 GRANT INSERT, SELECT ON TABLE servicios."Consumo" TO rol_app;

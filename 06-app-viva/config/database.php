@@ -112,6 +112,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'application_name' => 'admin_viva',
         ],
 
         'sqlsrv' => [

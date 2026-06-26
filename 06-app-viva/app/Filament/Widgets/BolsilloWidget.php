@@ -43,7 +43,7 @@ class BolsilloWidget extends BaseWidget
         }
 
         // 3. Devolver las estadísticas en formato bonito
-        return [
+        $stats = [
             Stat::make('Crédito Disponible', 'Bs. ' . number_format($bolsillo->saldo_dinero, 2))
                 ->description('Línea: ' . $linea->numero_telefono)
                 ->descriptionIcon('heroicon-m-currency-dollar')
@@ -64,5 +64,21 @@ class BolsilloWidget extends BaseWidget
                 ->icon('heroicon-o-chat-bubble-oval-left-ellipsis')
                 ->color('warning'),
         ];
+
+        // 4. Buscar paquetes ilimitados activos (Bolsas Activas)
+        $bolsasActivas = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', \Carbon\Carbon::now())
+            ->get();
+
+        foreach ($bolsasActivas as $bolsa) {
+            $stats[] = Stat::make('Paquete Activo', $bolsa->nombre_paquete)
+                ->description('Vence: ' . \Carbon\Carbon::parse($bolsa->fecha_expiracion)->format('d/m/Y H:i'))
+                ->icon('heroicon-o-sparkles')
+                ->color('success');
+        }
+
+        return $stats;
     }
 }

@@ -39,18 +39,6 @@ class RecargaResource extends Resource
                             ->numeric()
                             ->prefix('Bs.')
                             ->label('Monto Recargado'),
-                        Forms\Components\Select::make('metodo_pago')
-                            ->required()
-                            ->options([
-                                'Tarjeta de Crédito' => 'Tarjeta de Crédito',
-                                'Tarjeta Física' => 'Tarjeta Física',
-                                'Transferencia' => 'Transferencia Bancaria',
-                                'Efectivo' => 'Efectivo',
-                            ])
-                            ->label('Método de Pago'),
-                        Forms\Components\DateTimePicker::make('fecha_recarga')
-                            ->required()
-                            ->label('Fecha de Transacción'),
                     ])->columns(2),
             ]);
     }

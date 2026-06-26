@@ -10,13 +10,17 @@ DECLARE
     v_es_doble_carga BOOLEAN := FALSE;
     v_monto_final NUMERIC(10,2);
 BEGIN
-    -- 1. Verificar si hay una promoción de "Doble Carga" vigente hoy
-    -- Buscamos en el esquema comercial si existe alguna promoción activa
-    SELECT EXISTS (
-        SELECT 1 FROM comercial."Promocion"
-        WHERE nombre ILIKE '%Doble Carga%'
-          AND CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin
-    ) INTO v_es_doble_carga;
+    -- 1. Verificar si hay una promoción de "Doble Carga" vigente hoy o si es el primer día del mes
+    -- Regla de negocio: Todos los días 1 de cada mes hay Doble Carga.
+    IF EXTRACT(DAY FROM CURRENT_TIMESTAMP) = 1 THEN
+        v_es_doble_carga := TRUE;
+    ELSE
+        SELECT EXISTS (
+            SELECT 1 FROM comercial."Promocion"
+            WHERE nombre_promo ILIKE '%Doble Carga%'
+              AND CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin
+        ) INTO v_es_doble_carga;
+    END IF;
 
     -- 2. Calcular el monto final a abonar
     IF v_es_doble_carga THEN

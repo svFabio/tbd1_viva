@@ -803,13 +803,39 @@ SET session_replication_role = DEFAULT;
 DO $$
 BEGIN
     PERFORM setval(pg_get_serial_sequence('clientes."Cliente"', 'id_cliente'), (SELECT COALESCE(MAX(id_cliente), 1) FROM clientes."Cliente"));
+    PERFORM setval(pg_get_serial_sequence('clientes."Persona_Natural"', 'id_persona'), (SELECT COALESCE(MAX(id_persona), 1) FROM clientes."Persona_Natural"));
+    PERFORM setval(pg_get_serial_sequence('clientes."Empresa"', 'id_empresa'), (SELECT COALESCE(MAX(id_empresa), 1) FROM clientes."Empresa"));
+    
     PERFORM setval(pg_get_serial_sequence('lineas."Plan"', 'id_plan'), (SELECT COALESCE(MAX(id_plan), 1) FROM lineas."Plan"));
     PERFORM setval(pg_get_serial_sequence('lineas."SIM_Card"', 'id_sim'), (SELECT COALESCE(MAX(id_sim), 1) FROM lineas."SIM_Card"));
     PERFORM setval(pg_get_serial_sequence('lineas."Equipo"', 'id_equipo'), (SELECT COALESCE(MAX(id_equipo), 1) FROM lineas."Equipo"));
     PERFORM setval(pg_get_serial_sequence('lineas."Linea"', 'id_linea'), (SELECT COALESCE(MAX(id_linea), 1) FROM lineas."Linea"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Linea_Postpago"', 'id_postpago'), (SELECT COALESCE(MAX(id_postpago), 1) FROM lineas."Linea_Postpago"));
+    PERFORM setval(pg_get_serial_sequence('lineas."Historial_Linea_Equipo"', 'id_historial'), (SELECT COALESCE(MAX(id_historial), 1) FROM lineas."Historial_Linea_Equipo"));
+    
     PERFORM setval(pg_get_serial_sequence('servicios."Paquete"', 'id_paquete'), (SELECT COALESCE(MAX(id_paquete), 1) FROM servicios."Paquete"));
+    PERFORM setval(pg_get_serial_sequence('servicios."App_Exenta_En_Bolsa"', 'id_app'), (SELECT COALESCE(MAX(id_app), 1) FROM servicios."App_Exenta_En_Bolsa"));
+    PERFORM setval(pg_get_serial_sequence('servicios."Bolsa_Activa"', 'id_bolsa_activa'), (SELECT COALESCE(MAX(id_bolsa_activa), 1) FROM servicios."Bolsa_Activa"));
+    PERFORM setval(pg_get_serial_sequence('servicios."Consumo"', 'id_consumo'), (SELECT COALESCE(MAX(id_consumo), 1) FROM servicios."Consumo"));
+    
+    PERFORM setval(pg_get_serial_sequence('finanzas."Tarjeta_Recarga"', 'id_tarjeta'), (SELECT COALESCE(MAX(id_tarjeta), 1) FROM finanzas."Tarjeta_Recarga"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Bolsillo"', 'id_bolsillo'), (SELECT COALESCE(MAX(id_bolsillo), 1) FROM finanzas."Bolsillo"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Recarga"', 'id_recarga'), (SELECT COALESCE(MAX(id_recarga), 1) FROM finanzas."Recarga"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."T_Presta"', 'id_prestamo'), (SELECT COALESCE(MAX(id_prestamo), 1) FROM finanzas."T_Presta"));
     PERFORM setval(pg_get_serial_sequence('finanzas."Factura"', 'id_factura'), (SELECT COALESCE(MAX(id_factura), 1) FROM finanzas."Factura"));
-    PERFORM setval(pg_get_serial_sequence('finanzas."Detalle_Factura"', 'id_detalle'), (SELECT COALESCE(MAX(id_detalle), 1) FROM finanzas."Detalle_Factura"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Transfuzion"', 'id_transfuzion'), (SELECT COALESCE(MAX(id_transfuzion), 1) FROM finanzas."Transfuzion"));
+    PERFORM setval(pg_get_serial_sequence('finanzas."Transaccion"', 'id_transaccion'), (SELECT COALESCE(MAX(id_transaccion), 1) FROM finanzas."Transaccion"));
+    
+    PERFORM setval(pg_get_serial_sequence('comercial."Promocion"', 'id_promocion'), (SELECT COALESCE(MAX(id_promocion), 1) FROM comercial."Promocion"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Condicion_Promocion"', 'id_condicion'), (SELECT COALESCE(MAX(id_condicion), 1) FROM comercial."Condicion_Promocion"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Promocion_Linea"', 'id_promo_linea'), (SELECT COALESCE(MAX(id_promo_linea), 1) FROM comercial."Promocion_Linea"));
+    PERFORM setval(pg_get_serial_sequence('comercial."Numero_Amigo"', 'id_numero_amigo'), (SELECT COALESCE(MAX(id_numero_amigo), 1) FROM comercial."Numero_Amigo"));
+    
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Condicion_Puntos"', 'id_condicion'), (SELECT COALESCE(MAX(id_condicion), 1) FROM fidelizacion."Condicion_Puntos"));
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Puntos_Bonus"', 'id_puntos'), (SELECT COALESCE(MAX(id_puntos), 1) FROM fidelizacion."Puntos_Bonus"));
+    PERFORM setval(pg_get_serial_sequence('fidelizacion."Historial_Puntos"', 'id_historial'), (SELECT COALESCE(MAX(id_historial), 1) FROM fidelizacion."Historial_Puntos"));
+    
+    PERFORM setval(pg_get_serial_sequence('seguridad."Auditoria"', 'id_auditoria'), (SELECT COALESCE(MAX(id_auditoria), 1) FROM seguridad."Auditoria"));
     PERFORM setval(pg_get_serial_sequence('seguridad."Usuario_Sistema"', 'id_usuario'), (SELECT COALESCE(MAX(id_usuario), 1) FROM seguridad."Usuario_Sistema"));
 EXCEPTION WHEN OTHERS THEN
     -- Si alguna tabla no tiene secuencia o falla, lo ignora de forma silenciosa para que no colapse el docker

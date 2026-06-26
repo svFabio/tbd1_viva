@@ -39,6 +39,29 @@ class RecargarSaldo extends Page implements HasForms
 
     public function form(Form $form): Form
     {
+        $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
+        
+        $esDiaDobleCarga = (date('j') == 1) || DB::table('comercial.Promocion')
+            ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
+            ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
+            ->exists();
+
+        $yaUsoBono = DB::table('finanzas.Recarga')
+            ->where('id_linea', $lineaId)
+            ->where('aplicar_bono', true)
+            ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
+            ->exists();
+
+        $puedeActivarBono = $esDiaDobleCarga && !$yaUsoBono;
+        $mensajeBono = '';
+        if (!$esDiaDobleCarga) {
+            $mensajeBono = 'Hoy no es día de Doble Carga.';
+        } elseif ($yaUsoBono) {
+            $mensajeBono = 'Ya utilizaste tu Doble Carga este mes.';
+        } else {
+            $mensajeBono = '¡Tienes disponible tu Doble Carga de este mes!';
+        }
+
         return $form
             ->schema([
                 TextInput::make('monto')
@@ -57,6 +80,11 @@ class RecargarSaldo extends Page implements HasForms
                     ])
                     ->required()
                     ->default('qr'),
+                \Filament\Forms\Components\Toggle::make('aplicar_bono')
+                    ->label('Aplicar Doble Carga')
+                    ->helperText($mensajeBono)
+                    ->disabled(!$puedeActivarBono)
+                    ->default(false),
             ])
             ->statePath('data');
     }
@@ -64,6 +92,7 @@ class RecargarSaldo extends Page implements HasForms
     public function submit(): void
     {
         $monto = $this->data['monto'];
+        $aplicarBono = $this->data['aplicar_bono'] ?? false;
         $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
 
         if (!$lineaId) {
@@ -72,19 +101,20 @@ class RecargarSaldo extends Page implements HasForms
         }
 
         try {
-            DB::transaction(function () use ($lineaId, $monto) {
+            DB::transaction(function () use ($lineaId, $monto, $aplicarBono) {
                 // Configurar el entorno de base de datos como rol_app (simulado por el middleware o aquí si es necesario)
                 // DB::statement("SET ROLE rol_app");
 
                 Recarga::create([
                     'id_linea' => $lineaId,
                     'monto' => $monto,
+                    'aplicar_bono' => $aplicarBono,
                 ]);
             });
 
             Notification::make()
                 ->title('¡Recarga Exitosa!')
-                ->body("Has recargado Bs. {$monto} a tu línea. ¡Revisa tu bolsillo para ver el nuevo saldo!")
+                ->body("Has recargado Bs. {$monto} a tu línea" . ($aplicarBono ? ' ¡con Doble Carga aplicada!' : '') . " Revisa tu bolsillo.")
                 ->success()
                 ->send();
                 

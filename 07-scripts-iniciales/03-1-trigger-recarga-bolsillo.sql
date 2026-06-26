@@ -23,26 +23,26 @@ BEGIN
         ) INTO v_es_dia_doble_carga;
     END IF;
 
-    -- 2. Si hoy es día de doble carga, verificamos si el cliente YA recibió un bono este mes
-    IF v_es_dia_doble_carga THEN
-        SELECT EXISTS (
-            SELECT 1 FROM finanzas."Recarga"
-            WHERE id_linea = NEW.id_linea
-              AND id_recarga != NEW.id_recarga -- Excluir la recarga actual
-              AND date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)
-              AND (
-                  EXTRACT(DAY FROM fecha_recarga) = 1
-                  OR EXISTS (
-                      SELECT 1 FROM comercial."Promocion"
-                      WHERE nombre_promo ILIKE '%Doble Carga%'
-                        AND fecha_recarga BETWEEN fecha_inicio AND fecha_fin
-                  )
-              )
-        ) INTO v_ya_recibio_bono;
-    END IF;
+    -- 2. Verificar si el cliente YA usó su bono este mes (buscando recargas anteriores con aplicar_bono = true)
+    SELECT EXISTS (
+        SELECT 1 FROM finanzas."Recarga"
+        WHERE id_linea = NEW.id_linea
+          AND id_recarga != NEW.id_recarga
+          AND aplicar_bono = TRUE
+          AND date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)
+    ) INTO v_ya_recibio_bono;
 
-    -- 3. Calcular el monto final a abonar (solo 1 bono por mes)
-    IF v_es_dia_doble_carga AND NOT v_ya_recibio_bono THEN
+    -- 3. Validar y Calcular el monto final a abonar
+    IF NEW.aplicar_bono THEN
+        -- Seguridad a nivel de BD: si el cliente manda aplicar_bono=true pero no le toca, BLOQUEAR.
+        IF NOT v_es_dia_doble_carga THEN
+            RAISE EXCEPTION 'No se puede aplicar Doble Carga porque hoy no es día de promoción ni día 1 del mes.';
+        END IF;
+
+        IF v_ya_recibio_bono THEN
+            RAISE EXCEPTION 'Fraude bloqueado: El cliente ya utilizó su beneficio de Doble Carga este mes.';
+        END IF;
+
         v_monto_final := NEW.monto * 2;
     ELSE
         v_monto_final := NEW.monto;

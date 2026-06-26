@@ -303,6 +303,7 @@ CREATE TABLE finanzas."Recarga" (
     monto         numeric(10, 2) NOT NULL,
     fecha_recarga timestamp DEFAULT CURRENT_TIMESTAMP NULL,
     id_tarjeta    int4 NULL,
+    aplicar_bono  boolean DEFAULT false,
     CONSTRAINT "Recarga_pkey" PRIMARY KEY (id_recarga),
     CONSTRAINT fk_rec_tar FOREIGN KEY (id_tarjeta) REFERENCES finanzas."Tarjeta_Recarga"(id_tarjeta)
 );

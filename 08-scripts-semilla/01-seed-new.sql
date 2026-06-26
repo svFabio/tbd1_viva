@@ -768,33 +768,33 @@ INSERT INTO seguridad."Auditoria" (id_auditoria, tabla_afectada, operacion, usua
 (19, 'comercial.Numero_Amigo','INSERT','u_app',         '2026-02-01 10:00:00', 'nuevo numero amigo id:1 origen:1 destino:5'),
 (20, 'finanzas.Transfuzion', 'INSERT', 'u_app',         '2026-03-20 12:00:00', 'transfuzion id:1 origen:1 destino:5 monto:10.00');
 
-INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id_cliente) VALUES
-(1,  'jmamani',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 1),
-(2,  'mquispe',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 2),
-(3,  'pvargas',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 3),
-(4,  'agutierrez',  '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 4),
-(5,  'cmendoza',    '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 5),
-(6,  'rchoque',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 6),
-(7,  'laguilar',    '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 7),
-(8,  'psalazar',    '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 8),
-(9,  'rnina',       '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 9),
-(10, 'capaza',      '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 10),
-(11, 'jespinoza',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 11),
-(12, 'svedia',      '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 12),
-(13, 'oterceros',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 13),
-(14, 'gmontano',    '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 14),
-(15, 'rpanozo',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 15),
-(16, 'vtorrez',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 16),
-(17, 'fcossio',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 17),
-(18, 'dheredia',    '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 18),
-(19, 'psanjinez',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 20),
-(20, 'kvillanueva', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 21),
--- usuarios admin sin id_cliente
-(21, 'u.comercial', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
-(22, 'u.auditor',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
-(23, 'u.agencia',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
-(24, 'u.finanzas',  '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL),
-(25, 'u.reporte',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL);
+INSERT INTO seguridad."Usuario_Sistema" (id_usuario, username, password_hash, id_cliente, rol_db) VALUES
+(1,  'jmamani',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 1,  'rol_app'),
+(2,  'mquispe',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 2,  'rol_app'),
+(3,  'pvargas',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 3,  'rol_app'),
+(4,  'agutierrez',       '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 4,  'rol_app'),
+(5,  'cmendoza',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 5,  'rol_app'),
+(6,  'rchoque',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 6,  'rol_app'),
+(7,  'laguilar',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 7,  'rol_app'),
+(8,  'psalazar',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 8,  'rol_app'),
+(9,  'rnina',            '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 9,  'rol_app'),
+(10, 'capaza',           '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 10, 'rol_app'),
+(11, 'jespinoza',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 11, 'rol_app'),
+(12, 'svedia',           '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 12, 'rol_app'),
+(13, 'oterceros',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 13, 'rol_app'),
+(14, 'gmontano',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 14, 'rol_app'),
+(15, 'rpanozo',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 15, 'rol_app'),
+(16, 'vtorrez',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 16, 'rol_app'),
+(17, 'fcossio',          '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 17, 'rol_app'),
+(18, 'dheredia',         '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 18, 'rol_app'),
+(19, 'psanjinez',        '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 20, 'rol_app'),
+(20, 'kvillanueva',      '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', 21, 'rol_app'),
+-- Empleados internos VIVA con nombre real (rol admin, sin id_cliente)
+(21, 'adan.pereira',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_comercial'),
+(22, 'aurelio.casillas', '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_auditor'),
+(23, 'carlos.agencia',   '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_agencia'),
+(24, 'finn.almanza',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_finanzas'),
+(25, 'rebeca.jones',     '$2y$12$stELj8pHfOc/uErwCJ5qiuteb0uHWRQOcsNsRUwYCEGJ.Lh57gx3C', NULL, 'rol_reporte');
 
 -- Re-habilitar triggers (volver al comportamiento normal)
 SET session_replication_role = DEFAULT;

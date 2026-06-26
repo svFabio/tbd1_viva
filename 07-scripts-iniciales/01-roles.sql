@@ -25,9 +25,10 @@ CREATE USER u_carlos_agencia   WITH PASSWORD 'agencia123'  VALID UNTIL '2026-12-
 CREATE USER u_admin_web WITH PASSWORD 'AdminWeb!2026' NOINHERIT;
 
 GRANT rol_comercial TO u_admin_web;
-GRANT rol_auditor TO u_admin_web;
-GRANT rol_reporte TO u_admin_web;
-GRANT rol_finanzas TO u_admin_web;
-GRANT rol_agencia TO u_admin_web;
+GRANT rol_auditor   TO u_admin_web;
+GRANT rol_reporte   TO u_admin_web;
+GRANT rol_finanzas  TO u_admin_web;
+GRANT rol_agencia   TO u_admin_web;
+GRANT rol_app       TO u_admin_web;  -- Necesario para clientes que inician sesión
 
 

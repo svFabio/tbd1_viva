@@ -43,32 +43,47 @@ class SimuladorTrafico extends Page
             if ($tipoActividad === 'DATOS_GENERAL') {
                 $cantidadCobrar = $segundos * 1.0;
                 $mensaje = "Navegaste por $segundos segundos. Consumo: $cantidadCobrar MB.";
-            } 
+            }
             elseif ($tipoActividad === 'VOZ') {
                 $tipoConsumoDB = 'Voz';
                 $cantidadCobrar = $segundos * 1; // 1 min por segundo simulado
                 $mensaje = "Llamaste por $segundos min simulados.";
-            } 
-            elseif (in_array($tipoActividad, ['APP_WHATSAPP', 'APP_TIKTOK'])) {
-                $nombreApp = ($tipoActividad === 'APP_WHATSAPP') ? 'WhatsApp' : 'TikTok';
-                $tasaPorSegundo = ($tipoActividad === 'APP_WHATSAPP') ? 0.1 : 1.0;
-                
-                // Verificar bolsa ilimitada
+            }
+            elseif (str_starts_with($tipoActividad, 'APP_')) {
+                // ── Lógica dinámica: el nombre de la app viene del frontend como
+                //    "APP_WHATSAPP", "APP_TIKTOK", "APP_NETFLIX", etc.
+                //    Lo convertimos a texto legible para buscar en la BD.
+                $nombreApp = ucfirst(strtolower(substr($tipoActividad, 4)));
+                // Tasa por defecto: 1 MB/s para apps de video, 0.1 MB/s para mensajería
+                // El comercial controla qué apps existen — la tasa no se hardcodea por app.
+                $tasaPorSegundo = 1.0;
+
+                // ── Consulta dinámica: busca en BD si el usuario tiene una bolsa activa
+                //    que incluya esta app como exenta (sin importar qué app sea)
                 $bolsaActiva = DB::table('servicios.Bolsa_Activa')
-                    ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                    ->join(
+                        'servicios.App_Exenta_En_Bolsa',
+                        'servicios.Bolsa_Activa.id_paquete',
+                        '=',
+                        'servicios.App_Exenta_En_Bolsa.id_paquete'
+                    )
                     ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
                     ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
                     ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
-                    ->select('servicios.Bolsa_Activa.id_bolsa_activa')
+                    ->select(
+                        'servicios.Bolsa_Activa.id_bolsa_activa',
+                        'servicios.App_Exenta_En_Bolsa.nombre_app as nombre_real'
+                    )
                     ->first();
 
                 if ($bolsaActiva) {
                     $cantidadCobrar = 0;
                     $idBolsaIlimitada = $bolsaActiva->id_bolsa_activa;
-                    $mensaje = "Usaste $nombreApp por $segundos segundos. ¡Te salió 100% GRATIS!";
+                    $nombreReal = $bolsaActiva->nombre_real;
+                    $mensaje = "Usaste $nombreReal por $segundos segundos. ¡Te salió 100% GRATIS (bolsa ilimitada activa)!";
                 } else {
                     $cantidadCobrar = $segundos * $tasaPorSegundo;
-                    $mensaje = "Usaste $nombreApp sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
+                    $mensaje = "Usaste $nombreApp por $segundos segundos sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
                 }
             }
 

@@ -3,11 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Models\Paquete;
+use App\Models\AppExentaEnBolsa;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 
 class PaqueteResource extends Resource
 {
@@ -55,13 +57,34 @@ class PaqueteResource extends Resource
                 Forms\Components\Repeater::make('appsExentas')
                     ->relationship()
                     ->schema([
-                        Forms\Components\TextInput::make('nombre_app')
-                            ->label('Nombre de la App (Ej: WhatsApp, TikTok)')
+                        Forms\Components\Select::make('nombre_app')
+                            ->label('Aplicación Exenta')
                             ->required()
-                            ->maxLength(50),
+                            ->searchable()
+                            ->getSearchResultsUsing(function (string $search) {
+                                // Busca en todas las apps ya registradas en la BD
+                                return AppExentaEnBolsa::select('nombre_app')
+                                    ->where('nombre_app', 'ilike', "%{$search}%")
+                                    ->distinct()
+                                    ->orderBy('nombre_app')
+                                    ->limit(20)
+                                    ->pluck('nombre_app', 'nombre_app')
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(fn ($value) => $value)
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('nombre_app')
+                                    ->label('Nueva App (escribe el nombre exacto)')
+                                    ->required()
+                                    ->maxLength(50)
+                                    ->placeholder('Ej: Netflix, Spotify, Disney+'),
+                            ])
+                            ->createOptionUsing(fn (array $data) => $data['nombre_app'])
+                            ->placeholder('Busca o escribe una app nueva...'),
                     ])
                     ->label('Aplicaciones Exentas (Ilimitadas)')
-                    ->addActionLabel('Agregar App'),
+                    ->addActionLabel('Agregar App')
+                    ->distinct(),  // Evita que se repita la misma app en el mismo paquete
             ]);
     }
 

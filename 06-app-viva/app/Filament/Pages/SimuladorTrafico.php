@@ -60,13 +60,10 @@ class SimuladorTrafico extends Page
                 $cantidadCobrar = $segundos * 1; // 1 min por segundo simulado
                 $mensaje = "Llamaste por $segundos min simulados.";
             }
-            elseif (str_starts_with($tipoActividad, 'APP_')) {
-                // ── Lógica dinámica: el nombre de la app viene del frontend como
-                //    "APP_WHATSAPP", "APP_TIKTOK", "APP_NETFLIX", etc.
-                //    Lo convertimos a texto legible para buscar en la BD.
-                $nombreApp = ucfirst(strtolower(substr($tipoActividad, 4)));
-                // Tasa por defecto: 1 MB/s para apps de video, 0.1 MB/s para mensajería
-                // El comercial controla qué apps existen — la tasa no se hardcodea por app.
+            elseif (str_starts_with($tipoActividad, 'APP_B64:')) {
+                // ── El nombre de la app viene en base64 desde el frontend
+                //    para soportar apps con espacios y símbolos ("WhatsApp Business", "Disney+", etc.)
+                $nombreApp = base64_decode(substr($tipoActividad, 8));
                 $tasaPorSegundo = 1.0;
 
                 // ── Consulta dinámica: busca en BD si el usuario tiene una bolsa activa
@@ -80,7 +77,7 @@ class SimuladorTrafico extends Page
                     )
                     ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
                     ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
-                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
+                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
                     ->select(
                         'servicios.Bolsa_Activa.id_bolsa_activa',
                         'servicios.App_Exenta_En_Bolsa.nombre_app as nombre_real'

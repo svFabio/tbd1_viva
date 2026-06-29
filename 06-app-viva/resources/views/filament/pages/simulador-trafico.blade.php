@@ -46,7 +46,8 @@
             @foreach($appsExentas as $app)
                 @php 
                     $clave = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $app)); 
-                    $tipoBackend = 'APP_' . strtoupper(preg_replace('/[^a-zA-Z0-9]+/', '', $app)); 
+                    // Pasamos el nombre REAL de la app (base64 para evitar problemas con caracteres especiales)
+                    $nombreAppB64 = base64_encode($app);
                 @endphp
                 <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
                     <div style="width: 48px; height: 48px;" class="mb-2 text-primary-500">
@@ -55,13 +56,13 @@
                     <h3 class="font-bold text-lg">Usar {{ $app }}</h3>
                     <p class="text-sm text-gray-500 mb-4">Uso de datos (gratis si tienes paquete)</p>
                     
-                    <div x-show="!activo.{{ $clave }}">
+                    <div x-show="!activo['{{ $clave }}']">
                         <x-filament::button color="success" x-on:click="iniciar('{{ $clave }}')">Abrir {{ $app }}</x-filament::button>
                     </div>
-                    <div x-show="activo.{{ $clave }}" class="w-full">
-                        <div class="text-4xl font-bold text-success-600 mb-2" x-text="(segundos.{{ $clave }} || 0) + ' s'"></div>
+                    <div x-show="activo['{{ $clave }}']" class="w-full">
+                        <div class="text-4xl font-bold text-success-600 mb-2" x-text="(segundos['{{ $clave }}'] || 0) + ' s'"></div>
                         <div class="text-lg text-gray-500 mb-4" x-text="'Usando app...'"></div>
-                        <x-filament::button color="danger" x-on:click="detener('{{ $clave }}', '{{ $tipoBackend }}')">Cerrar App</x-filament::button>
+                        <x-filament::button color="danger" x-on:click="detener('{{ $clave }}', 'APP_B64:{{ $nombreAppB64 }}')">Cerrar App</x-filament::button>
                     </div>
                 </div>
             @endforeach
@@ -93,9 +94,9 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('simuladorTrafico', () => ({
-                activo: { navegar: false, llamar: false, whatsapp: false, tiktok: false, sms: false },
-                segundos: { navegar: 0, llamar: 0, whatsapp: 0, tiktok: 0 },
-                intervalos: { navegar: null, llamar: null, whatsapp: null, tiktok: null },
+                activo: { navegar: false, llamar: false, sms: false },
+                segundos: { navegar: 0, llamar: 0 },
+                intervalos: { navegar: null, llamar: null },
                 mensajeSms: '',
 
                 iniciar(clave) {

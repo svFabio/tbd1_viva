@@ -94,16 +94,37 @@ class PaqueteResource extends Resource
                     ->label('Apps Exentas')
                     ->badge()
                     ->color('success'),
+                Tables\Columns\IconColumn::make('activo')
+                    ->label('Estado')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
             ])
+            ->modifyQueryUsing(fn ($query) => $query->withoutGlobalScope('activo')) // Mostrar todos para gestión
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('desactivar')
+                    ->label('Desactivar')
+                    ->icon('heroicon-o-eye-slash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Desactivar este paquete?')
+                    ->modalDescription('El paquete dejará de estar disponible para nuevos clientes. Los clientes que ya lo tienen activo no se ven afectados. Esta acción es reversible.')
+                    ->visible(fn ($record) => $record->activo)
+                    ->action(fn ($record) => $record->desactivar()),
+                Tables\Actions\Action::make('activar')
+                    ->label('Reactivar')
+                    ->icon('heroicon-o-eye')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Reactivar este paquete?')
+                    ->modalDescription('El paquete volverá a estar disponible para la venta.')
+                    ->visible(fn ($record) => !$record->activo)
+                    ->action(fn ($record) => $record->activar()),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]); // Sin borrado masivo
     }
 
     public static function getPages(): array

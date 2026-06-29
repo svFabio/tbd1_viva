@@ -43,41 +43,28 @@
                 </div>
             </div>
 
-            <!-- WhatsApp -->
-            <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <div style="width: 48px; height: 48px;" class="mb-2 text-green-500">
-                    <x-heroicon-o-chat-bubble-left-right />
+            @foreach($appsExentas as $app)
+                @php 
+                    $clave = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '', $app)); 
+                    $tipoBackend = 'APP_' . strtoupper(preg_replace('/[^a-zA-Z0-9]+/', '', $app)); 
+                @endphp
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
+                    <div style="width: 48px; height: 48px;" class="mb-2 text-primary-500">
+                        <x-heroicon-o-device-phone-mobile />
+                    </div>
+                    <h3 class="font-bold text-lg">Usar {{ $app }}</h3>
+                    <p class="text-sm text-gray-500 mb-4">Uso de datos (gratis si tienes paquete)</p>
+                    
+                    <div x-show="!activo.{{ $clave }}">
+                        <x-filament::button color="success" x-on:click="iniciar('{{ $clave }}')">Abrir {{ $app }}</x-filament::button>
+                    </div>
+                    <div x-show="activo.{{ $clave }}" class="w-full">
+                        <div class="text-4xl font-bold text-success-600 mb-2" x-text="(segundos.{{ $clave }} || 0) + ' s'"></div>
+                        <div class="text-lg text-gray-500 mb-4" x-text="'Usando app...'"></div>
+                        <x-filament::button color="danger" x-on:click="detener('{{ $clave }}', '{{ $tipoBackend }}')">Cerrar App</x-filament::button>
+                    </div>
                 </div>
-                <h3 class="font-bold text-lg">Mandar WhatsApp</h3>
-                <p class="text-sm text-gray-500 mb-4">Gasta 0.1 MB por segundo (¡A menos que tengas ilimitado!)</p>
-                
-                <div x-show="!activo.whatsapp">
-                    <x-filament::button color="success" x-on:click="iniciar('whatsapp')">Abrir WhatsApp</x-filament::button>
-                </div>
-                <div x-show="activo.whatsapp" class="w-full">
-                    <div class="text-4xl font-bold text-green-600 mb-2" x-text="segundos.whatsapp + ' s'"></div>
-                    <div class="text-lg text-gray-500 mb-4" x-text="'Enviando mensajes...'"></div>
-                    <x-filament::button color="danger" x-on:click="detener('whatsapp', 'APP_WHATSAPP')">Cerrar App</x-filament::button>
-                </div>
-            </div>
-
-            <!-- TikTok -->
-            <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center">
-                <div style="width: 48px; height: 48px;" class="mb-2 text-gray-900 dark:text-white">
-                    <x-heroicon-o-video-camera />
-                </div>
-                <h3 class="font-bold text-lg">Ver TikTok</h3>
-                <p class="text-sm text-gray-500 mb-4">Gasta 1 MB por segundo (¡Muy pesado!)</p>
-                
-                <div x-show="!activo.tiktok">
-                    <x-filament::button color="gray" x-on:click="iniciar('tiktok')">Ver Videos</x-filament::button>
-                </div>
-                <div x-show="activo.tiktok" class="w-full">
-                    <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2" x-text="segundos.tiktok + ' s'"></div>
-                    <div class="text-lg text-gray-500 mb-4" x-text="'Deslizando videos...'"></div>
-                    <x-filament::button color="danger" x-on:click="detener('tiktok', 'APP_TIKTOK')">Cerrar App</x-filament::button>
-                </div>
-            </div>
+            @endforeach
 
             <!-- Enviar SMS Clásico -->
             <div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm text-center flex flex-col items-center justify-center md:col-span-2">
@@ -112,6 +99,11 @@
                 mensajeSms: '',
 
                 iniciar(clave) {
+                    if (this.activo[clave] === undefined) {
+                        this.activo[clave] = false;
+                        this.segundos[clave] = 0;
+                        this.intervalos[clave] = null;
+                    }
                     this.activo[clave] = true;
                     this.segundos[clave] = 0;
                     this.intervalos[clave] = setInterval(() => {

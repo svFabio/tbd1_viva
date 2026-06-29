@@ -24,6 +24,17 @@ class SimuladorTrafico extends Page
         return auth()->user()->id_cliente !== null;
     }
 
+    protected function getViewData(): array
+    {
+        return [
+            'appsExentas' => DB::table('servicios.App_Exenta_En_Bolsa')
+                ->select('nombre_app')
+                ->distinct()
+                ->pluck('nombre_app')
+                ->toArray(),
+        ];
+    }
+
     public function procesarTrafico($tipoActividad, $segundos)
     {
         if ($segundos <= 0) return;

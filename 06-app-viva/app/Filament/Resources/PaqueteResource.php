@@ -20,7 +20,7 @@ class PaqueteResource extends Resource
     public static function canAccess(): bool
     {
         $rol = auth()->user()?->rol_db;
-        return in_array($rol, ['rol_comercial', 'rol_reporte', 'rol_auditor']);
+        return $rol === 'rol_comercial';
     }
 
     public static function form(Form $form): Form

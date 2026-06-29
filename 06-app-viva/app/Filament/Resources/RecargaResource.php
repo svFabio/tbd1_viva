@@ -22,7 +22,7 @@ class RecargaResource extends Resource
     public static function canAccess(): bool
     {
         $rol = auth()->user()?->rol_db;
-        return in_array($rol, ['rol_finanzas', 'rol_auditor', 'rol_reporte']);
+        return $rol === 'rol_finanzas';
     }
 
     public static function form(Form $form): Form

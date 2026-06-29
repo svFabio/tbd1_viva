@@ -19,7 +19,8 @@ class PaqueteResource extends Resource
 
     public static function canAccess(): bool
     {
-        return true; // Dejamos pasar al frontend para que la BD lo reviente
+        $rol = auth()->user()?->rol_db;
+        return in_array($rol, ['rol_comercial', 'rol_reporte', 'rol_auditor']);
     }
 
     public static function form(Form $form): Form

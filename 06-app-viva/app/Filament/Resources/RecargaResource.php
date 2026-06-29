@@ -21,7 +21,8 @@ class RecargaResource extends Resource
 
     public static function canAccess(): bool
     {
-        return true; // Dejamos pasar al frontend para que la BD lo reviente
+        $rol = auth()->user()?->rol_db;
+        return in_array($rol, ['rol_finanzas', 'rol_auditor', 'rol_reporte']);
     }
 
     public static function form(Form $form): Form

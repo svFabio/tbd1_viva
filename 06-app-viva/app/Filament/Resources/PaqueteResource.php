@@ -62,7 +62,7 @@ class PaqueteResource extends Resource
                             ->required()
                             ->searchable()
                             ->getSearchResultsUsing(function (string $search) {
-                                // Busca en todas las apps ya registradas en la BD
+                                // Solo muestra apps ya registradas en la BD — no se pueden inventar nuevas
                                 return AppExentaEnBolsa::select('nombre_app')
                                     ->where('nombre_app', 'ilike', "%{$search}%")
                                     ->distinct()
@@ -72,15 +72,7 @@ class PaqueteResource extends Resource
                                     ->toArray();
                             })
                             ->getOptionLabelUsing(fn ($value) => $value)
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('nombre_app')
-                                    ->label('Nueva App (escribe el nombre exacto)')
-                                    ->required()
-                                    ->maxLength(50)
-                                    ->placeholder('Ej: Netflix, Spotify, Disney+'),
-                            ])
-                            ->createOptionUsing(fn (array $data) => $data['nombre_app'])
-                            ->placeholder('Busca o escribe una app nueva...'),
+                            ->placeholder('Busca una app del catálogo...'),
                     ])
                     ->label('Aplicaciones Exentas (Ilimitadas)')
                     ->addActionLabel('Agregar App')

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClienteResource\Pages;
 use App\Models\Cliente;
+use App\Models\PersonaNatural;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -61,7 +62,7 @@ class ClienteResource extends Resource
                             ->required()
                             ->maxLength(20)
                             ->label('Carnet de Identidad (CI)')
-                            ->unique(table: 'clientes.Persona_Natural', column: 'ci', ignoreRecord: true),
+                            ->unique(table: config('database.default') . '.' . (new PersonaNatural())->getTable(), column: 'ci', ignoreRecord: true),
                         
                         Forms\Components\TextInput::make('correo')
                             ->email()

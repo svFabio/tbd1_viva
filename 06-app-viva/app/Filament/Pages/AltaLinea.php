@@ -141,7 +141,11 @@ class AltaLinea extends Page implements HasForms
             }
 
             // 4. Asignar Línea con Número Aleatorio VIVA (Ej: 707XXXXX)
-            $numeroTelefono = '707' . rand(10000, 99999);
+            // Reintentamos hasta encontrar un número que no exista ya en la BD
+            do {
+                $numeroTelefono = '707' . rand(10000, 99999);
+            } while (DB::table('lineas.Linea')->where('numero_telefono', $numeroTelefono)->exists());
+
             $lineaId = DB::table('lineas.Linea')->insertGetId([
                 'id_cliente' => $clienteId,
                 'id_plan' => $data['id_plan'],

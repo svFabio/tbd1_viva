@@ -16,7 +16,7 @@
                 <p class="text-sm text-gray-500 mb-4">Gasta 1 MB por segundo</p>
                 
                 <div x-show="!activo.navegar">
-                    <x-filament::button x-on:click="iniciar('navegar')">Iniciar Navegación</x-filament::button>
+                    <x-filament::button x-on:click="iniciar('navegar', 'DATOS_GENERAL')">Iniciar Navegación</x-filament::button>
                 </div>
                 <div x-show="activo.navegar" class="w-full">
                     <div class="text-4xl font-bold text-primary-600 mb-2" x-text="segundos.navegar + ' s'"></div>
@@ -34,7 +34,7 @@
                 <p class="text-sm text-gray-500 mb-4">Simulador: 1 Minuto gastado por segundo real</p>
                 
                 <div x-show="!activo.llamar">
-                    <x-filament::button color="success" x-on:click="iniciar('llamar')">Llamar a Mamá</x-filament::button>
+                    <x-filament::button color="success" x-on:click="iniciar('llamar', 'VOZ')">Llamar a Mamá</x-filament::button>
                 </div>
                 <div x-show="activo.llamar" class="w-full">
                     <div class="text-4xl font-bold text-success-600 mb-2" x-text="segundos.llamar + ' s'"></div>
@@ -57,7 +57,7 @@
                     <p class="text-sm text-gray-500 mb-4">Uso de datos (gratis si tienes paquete)</p>
                     
                     <div x-show="!activo['{{ $clave }}']">
-                        <x-filament::button color="success" x-on:click="iniciar('{{ $clave }}')">Abrir {{ $app }}</x-filament::button>
+                        <x-filament::button color="success" x-on:click="iniciar('{{ $clave }}', 'APP_B64:{{ $nombreAppB64 }}')">Abrir {{ $app }}</x-filament::button>
                     </div>
                     <div x-show="activo['{{ $clave }}']" class="w-full">
                         <div class="text-4xl font-bold text-success-600 mb-2" x-text="(segundos['{{ $clave }}'] || 0) + ' s'"></div>
@@ -99,7 +99,16 @@
                 intervalos: { navegar: null, llamar: null },
                 mensajeSms: '',
 
-                iniciar(clave) {
+                iniciar: async function(clave, tipoBackEnd) {
+                    // Preguntar al backend cuántos segundos puede gastar como máximo
+                    let maxSegundos = await this.$wire.getMaxSegundos(tipoBackEnd);
+                    
+                    if (maxSegundos <= 0) {
+                        // Forzar cobro de 1 para que el backend lance el error exacto (Megas insuficientes) y lo muestre
+                        this.$wire.procesarTrafico(tipoBackEnd, 1);
+                        return;
+                    }
+
                     if (this.activo[clave] === undefined) {
                         this.activo[clave] = false;
                         this.segundos[clave] = 0;
@@ -107,8 +116,14 @@
                     }
                     this.activo[clave] = true;
                     this.segundos[clave] = 0;
+                    
                     this.intervalos[clave] = setInterval(() => {
                         this.segundos[clave]++;
+                        
+                        // Detener automáticamente si llega al límite
+                        if (this.segundos[clave] >= maxSegundos) {
+                            this.detener(clave, tipoBackEnd);
+                        }
                     }, 1000);
                 },
 

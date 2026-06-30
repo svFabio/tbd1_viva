@@ -177,4 +177,41 @@ class SimuladorTrafico extends Page
             Notification::make()->title('Error al enviar SMS')->body($e->getMessage())->danger()->send();
         }
     }
+
+    public function getMaxSegundos($tipoActividad)
+    {
+        $user = auth()->user();
+        $linea = Linea::where('id_cliente', $user->id_cliente)->first();
+        if (!$linea) return 0;
+
+        $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->first();
+        if (!$bolsillo) return 0;
+
+        if ($tipoActividad === 'DATOS_GENERAL') {
+            return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+        }
+        
+        if ($tipoActividad === 'VOZ') {
+            return $bolsillo->saldo_minutos > 0 ? floor($bolsillo->saldo_minutos) : 0;
+        }
+
+        if (str_starts_with($tipoActividad, 'APP_B64:')) {
+            $nombreApp = base64_decode(substr($tipoActividad, 8));
+            
+            $bolsaActiva = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
+                ->first();
+
+            if ($bolsaActiva) {
+                return 999999; // Ilimitado
+            } else {
+                return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+            }
+        }
+
+        return 0;
+    }
 }

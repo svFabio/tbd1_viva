@@ -61,6 +61,21 @@ class ClienteResource extends Resource
                             ->default('Activo')
                             ->required()
                             ->label('Estado del Cliente'),
+                            
+                        Forms\Components\Select::make('ciudad')
+                            ->options([
+                                'La Paz' => 'La Paz',
+                                'Cochabamba' => 'Cochabamba',
+                                'Santa Cruz' => 'Santa Cruz',
+                                'Oruro' => 'Oruro',
+                                'Tarija' => 'Tarija',
+                                'Potosí' => 'Potosí',
+                                'Chuquisaca' => 'Chuquisaca',
+                                'Beni' => 'Beni',
+                                'Pando' => 'Pando',
+                            ])
+                            ->required()
+                            ->label('Ciudad'),
                         
                         Forms\Components\Hidden::make('fecha_registro')
                             ->default(fn () => now()->toDateTimeString()),
@@ -159,6 +174,11 @@ class ClienteResource extends Resource
                             $q->where('nit', 'like', "%{$search}%");
                         });
                     }),
+                    
+                Tables\Columns\TextColumn::make('ciudad')
+                    ->label('Ciudad')
+                    ->searchable()
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('contacto')
                     ->label('Contacto / Correo')
@@ -188,6 +208,20 @@ class ClienteResource extends Resource
                         'Inactivo' => 'Inactivo',
                     ])
                     ->label('Filtrar por Estado'),
+                    
+                Tables\Filters\SelectFilter::make('ciudad')
+                    ->options([
+                        'La Paz' => 'La Paz',
+                        'Cochabamba' => 'Cochabamba',
+                        'Santa Cruz' => 'Santa Cruz',
+                        'Oruro' => 'Oruro',
+                        'Tarija' => 'Tarija',
+                        'Potosí' => 'Potosí',
+                        'Chuquisaca' => 'Chuquisaca',
+                        'Beni' => 'Beni',
+                        'Pando' => 'Pando',
+                    ])
+                    ->label('Filtrar por Ciudad'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

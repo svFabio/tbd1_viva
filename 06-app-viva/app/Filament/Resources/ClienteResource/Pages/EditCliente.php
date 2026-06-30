@@ -16,4 +16,18 @@ class EditCliente extends EditRecord
             Actions\ViewAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $record = $this->record;
+        $data = $this->form->getRawState();
+
+        if (isset($data['tipo_cliente'])) {
+            if ($data['tipo_cliente'] === 'Persona Natural') {
+                $record->empresa()->delete();
+            } else {
+                $record->personaNatural()->delete();
+            }
+        }
+    }
 }

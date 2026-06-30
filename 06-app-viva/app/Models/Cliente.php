@@ -16,5 +16,10 @@ class Cliente extends Model
     {
         return $this->hasOne(PersonaNatural::class, 'id_cliente', 'id_cliente');
     }
+
+    public function empresa(): HasOne
+    {
+        return $this->hasOne(Empresa::class, 'id_cliente', 'id_cliente');
+    }
 }
 

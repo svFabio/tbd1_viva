@@ -55,7 +55,7 @@ class AltaLinea extends Page implements HasForms
                             ->required()
                             ->maxLength(20)
                             // Validación inteligente evitando el schema conflictivo
-                            ->unique(\App\Models\PersonaNatural::class, 'ci'),
+                            ->unique(config('database.default') . '.' . (new \App\Models\PersonaNatural())->getTable(), 'ci'),
                         TextInput::make('correo')
                             ->email()
                             ->maxLength(100),
@@ -78,7 +78,7 @@ class AltaLinea extends Page implements HasForms
                             ->label('Nombre de Usuario')
                             ->required()
                             ->maxLength(50)
-                            ->unique(User::class, 'username'),
+                            ->unique(config('database.default') . '.' . (new User())->getTable(), 'username'),
                         TextInput::make('password')
                             ->password()
                             ->required()

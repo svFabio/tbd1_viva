@@ -1,8 +1,9 @@
 DO $$
 DECLARE
     r record;
-    seq_val bigint;
     max_id bigint;
+    full_table text;
+    full_col   text;
 BEGIN
     FOR r IN
         SELECT
@@ -13,17 +14,17 @@ BEGIN
         WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
           AND is_identity = 'YES'
     LOOP
-        -- Execute a query to find the maximum ID value in the table
-        EXECUTE format('SELECT MAX(%I) FROM %I.%I', r.column_name, r.table_schema, r.table_name)
+        -- Nombre completo con comillas dobles para tablas con mayúsculas ("Promocion", "Paquete", etc.)
+        full_table := format('%I.%I', r.table_schema, r.table_name);
+        full_col   := r.column_name;
+
+        -- Máximo ID actual en la tabla
+        EXECUTE format('SELECT COALESCE(MAX(%I), 1) FROM %s', full_col, full_table)
         INTO max_id;
-        
-        -- Default to 1 if the table is empty
-        max_id := COALESCE(max_id, 1);
-        
-        -- Set the sequence value
-        EXECUTE format('SELECT setval(pg_get_serial_sequence(%L, %L), %L)',
-                       r.table_schema || '.' || r.table_name, r.column_name, max_id);
-                       
+
+        -- Ajustar la secuencia
+        PERFORM setval(pg_get_serial_sequence(full_table, full_col), max_id);
+
         RAISE NOTICE 'Secuencia de %.% ajustada a %', r.table_schema, r.table_name, max_id;
     END LOOP;
 END;

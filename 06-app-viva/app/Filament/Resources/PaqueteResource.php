@@ -3,11 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Models\Paquete;
+use App\Models\AppExentaEnBolsa;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 
 class PaqueteResource extends Resource
 {
@@ -19,7 +21,8 @@ class PaqueteResource extends Resource
 
     public static function canAccess(): bool
     {
-        return true; // Dejamos pasar al frontend para que la BD lo reviente
+        $rol = auth()->user()?->rol_db;
+        return $rol === 'rol_comercial';
     }
 
     public static function form(Form $form): Form
@@ -54,13 +57,26 @@ class PaqueteResource extends Resource
                 Forms\Components\Repeater::make('appsExentas')
                     ->relationship()
                     ->schema([
-                        Forms\Components\TextInput::make('nombre_app')
-                            ->label('Nombre de la App (Ej: WhatsApp, TikTok)')
+                        Forms\Components\Select::make('nombre_app')
+                            ->label('Aplicación Exenta')
                             ->required()
-                            ->maxLength(50),
+                            ->searchable()
+                            ->getSearchResultsUsing(function (string $search) {
+                                // Solo muestra apps ya registradas en la BD — no se pueden inventar nuevas
+                                return AppExentaEnBolsa::select('nombre_app')
+                                    ->where('nombre_app', 'ilike', "%{$search}%")
+                                    ->distinct()
+                                    ->orderBy('nombre_app')
+                                    ->limit(20)
+                                    ->pluck('nombre_app', 'nombre_app')
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(fn ($value) => $value)
+                            ->placeholder('Busca una app del catálogo...'),
                     ])
                     ->label('Aplicaciones Exentas (Ilimitadas)')
-                    ->addActionLabel('Agregar App'),
+                    ->addActionLabel('Agregar App')
+                    ->distinct(),  // Evita que se repita la misma app en el mismo paquete
             ]);
     }
 
@@ -78,16 +94,37 @@ class PaqueteResource extends Resource
                     ->label('Apps Exentas')
                     ->badge()
                     ->color('success'),
+                Tables\Columns\IconColumn::make('activo')
+                    ->label('Estado')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
             ])
+            ->modifyQueryUsing(fn ($query) => $query->withoutGlobalScope('activo')) // Mostrar todos para gestión
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('desactivar')
+                    ->label('Desactivar')
+                    ->icon('heroicon-o-eye-slash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Desactivar este paquete?')
+                    ->modalDescription('El paquete dejará de estar disponible para nuevos clientes. Los clientes que ya lo tienen activo no se ven afectados. Esta acción es reversible.')
+                    ->visible(fn ($record) => $record->activo)
+                    ->action(fn ($record) => $record->desactivar()),
+                Tables\Actions\Action::make('activar')
+                    ->label('Reactivar')
+                    ->icon('heroicon-o-eye')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('¿Reactivar este paquete?')
+                    ->modalDescription('El paquete volverá a estar disponible para la venta.')
+                    ->visible(fn ($record) => !$record->activo)
+                    ->action(fn ($record) => $record->activar()),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]); // Sin borrado masivo
     }
 
     public static function getPages(): array

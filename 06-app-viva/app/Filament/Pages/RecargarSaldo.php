@@ -49,18 +49,11 @@ class RecargarSaldo extends Page implements HasForms
             ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
             ->exists();
 
-        // Usamos la conexión normal, ahora que rol_app tiene permisos sobre Promocion
-        $esDiaDobleCarga = (date('j') == 1) || DB::table('comercial.Promocion')
-            ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
-            ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
-            ->exists();
-
-        $puedeActivarBono = $esDiaDobleCarga && !$yaUsoBono;
+        // Un cliente puede hacer doble carga CUALQUIER día del mes, pero solo UNA VEZ al mes.
+        $puedeActivarBono = !$yaUsoBono;
         
         $mensajeBono = '';
-        if (!$esDiaDobleCarga) {
-            $mensajeBono = 'Hoy no es día de Doble Carga.';
-        } elseif ($yaUsoBono) {
+        if ($yaUsoBono) {
             $mensajeBono = 'Ya utilizaste tu Doble Carga este mes.';
         } else {
             $mensajeBono = '¡Tienes disponible tu Doble Carga de este mes!';

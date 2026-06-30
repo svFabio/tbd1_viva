@@ -8,6 +8,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Filament\Notifications\Notification;
@@ -54,11 +55,35 @@ class AltaLinea extends Page implements HasForms
                             ->required()
                             ->maxLength(20)
                             // Validación inteligente evitando el schema conflictivo
-                            ->unique(\App\Models\PersonaNatural::class, 'ci'),
+                            ->unique(config('database.default') . '.' . (new \App\Models\PersonaNatural())->getTable(), 'ci'),
                         TextInput::make('correo')
                             ->email()
                             ->maxLength(100),
+                        Select::make('ciudad')
+                            ->options([
+                                'La Paz' => 'La Paz',
+                                'Cochabamba' => 'Cochabamba',
+                                'Santa Cruz' => 'Santa Cruz',
+                                'Oruro' => 'Oruro',
+                                'Tarija' => 'Tarija',
+                                'Potosí' => 'Potosí',
+                                'Chuquisaca' => 'Chuquisaca',
+                                'Beni' => 'Beni',
+                                'Pando' => 'Pando',
+                            ])
+                            ->required(),
                     ])->columns(2),
+
+                Section::make('Datos de la Línea y Plan')
+                    ->schema([
+                        Select::make('id_plan')
+                            ->label('Plan a contratar')
+                            ->options(function () {
+                                return DB::table('lineas.Plan')->pluck('nombre_plan', 'id_plan');
+                            })
+                            ->required()
+                            ->searchable(),
+                    ]),
 
                 Section::make('Credenciales Web (Para usar App Mi VIVA)')
                     ->schema([
@@ -66,7 +91,7 @@ class AltaLinea extends Page implements HasForms
                             ->label('Nombre de Usuario')
                             ->required()
                             ->maxLength(50)
-                            ->unique(User::class, 'username'),
+                            ->unique(config('database.default') . '.' . (new User())->getTable(), 'username'),
                         TextInput::make('password')
                             ->password()
                             ->required()
@@ -89,7 +114,8 @@ class AltaLinea extends Page implements HasForms
             // 1. Insertar Cliente
             $clienteId = DB::table('clientes.Cliente')->insertGetId([
                 'fecha_registro' => now(),
-                'estado' => 'Activo'
+                'estado' => 'Activo',
+                'ciudad' => $data['ciudad']
             ], 'id_cliente');
 
             // 2. Insertar Persona Natural
@@ -101,12 +127,29 @@ class AltaLinea extends Page implements HasForms
                 'correo' => $data['correo']
             ]);
 
-            // 3. Asignar Línea con Número Aleatorio VIVA (Ej: 707XXXXX)
-            $numeroTelefono = '707' . rand(10000, 99999);
+            // 3. Asignar SIM Card disponible (o crear una si no hay)
+            $sim = DB::table('lineas.SIM_Card')->where('estado', 'Disponible')->first();
+            if ($sim) {
+                $idSimActivo = $sim->id_sim;
+                DB::table('lineas.SIM_Card')->where('id_sim', $idSimActivo)->update(['estado' => 'Activo']);
+            } else {
+                $idSimActivo = DB::table('lineas.SIM_Card')->insertGetId([
+                    'iccid' => '89591' . str_pad(rand(0, 99999999999999), 14, '0', STR_PAD_LEFT),
+                    'imsi' => '73602' . str_pad(rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
+                    'estado' => 'Activo'
+                ], 'id_sim');
+            }
+
+            // 4. Asignar Línea con Número Aleatorio VIVA (Ej: 707XXXXX)
+            // Reintentamos hasta encontrar un número que no exista ya en la BD
+            do {
+                $numeroTelefono = '707' . rand(10000, 99999);
+            } while (DB::table('lineas.Linea')->where('numero_telefono', $numeroTelefono)->exists());
+
             $lineaId = DB::table('lineas.Linea')->insertGetId([
                 'id_cliente' => $clienteId,
-                'id_plan' => 1,
-                'id_sim' => 1,
+                'id_plan' => $data['id_plan'],
+                'id_sim_activo' => $idSimActivo,
                 'numero_telefono' => $numeroTelefono,
                 'estado' => 'Activo'
             ], 'id_linea');

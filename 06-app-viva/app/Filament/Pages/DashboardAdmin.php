@@ -92,12 +92,17 @@ class DashboardAdmin extends Page
         }
 
         // ── 4. Otros usuarios admin del sistema (para contexto, sin mostrar passwords) ──
-        $otrosAdmins = DB::table('seguridad.Usuario_Sistema')
-            ->whereNull('id_cliente')
-            ->where('rol_db', '!=', 'rol_app')
-            ->select('id_usuario', 'username', 'rol_db')
-            ->orderBy('rol_db')
-            ->get();
+        $otrosAdmins = collect([]);
+        try {
+            $otrosAdmins = DB::table('seguridad.Usuario_Sistema')
+                ->whereNull('id_cliente')
+                ->where('rol_db', '!=', 'rol_app')
+                ->select('id_usuario', 'username', 'rol_db')
+                ->orderBy('rol_db')
+                ->get();
+        } catch (\Exception $e) {
+            // El usuario actual no tiene permisos para ver seguridad.Usuario_Sistema
+        }
 
         // ── 5. Contadores rápidos según el rol ──
         $estadisticas = $this->getEstadisticasPorRol($rolDb);

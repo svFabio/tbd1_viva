@@ -24,6 +24,17 @@ class SimuladorTrafico extends Page
         return auth()->user()->id_cliente !== null;
     }
 
+    protected function getViewData(): array
+    {
+        return [
+            'appsExentas' => DB::table('servicios.App_Exenta_En_Bolsa')
+                ->select('nombre_app')
+                ->distinct()
+                ->pluck('nombre_app')
+                ->toArray(),
+        ];
+    }
+
     public function procesarTrafico($tipoActividad, $segundos)
     {
         if ($segundos <= 0) return;
@@ -43,32 +54,44 @@ class SimuladorTrafico extends Page
             if ($tipoActividad === 'DATOS_GENERAL') {
                 $cantidadCobrar = $segundos * 1.0;
                 $mensaje = "Navegaste por $segundos segundos. Consumo: $cantidadCobrar MB.";
-            } 
+            }
             elseif ($tipoActividad === 'VOZ') {
                 $tipoConsumoDB = 'Voz';
                 $cantidadCobrar = $segundos * 1; // 1 min por segundo simulado
                 $mensaje = "Llamaste por $segundos min simulados.";
-            } 
-            elseif (in_array($tipoActividad, ['APP_WHATSAPP', 'APP_TIKTOK'])) {
-                $nombreApp = ($tipoActividad === 'APP_WHATSAPP') ? 'WhatsApp' : 'TikTok';
-                $tasaPorSegundo = ($tipoActividad === 'APP_WHATSAPP') ? 0.1 : 1.0;
-                
-                // Verificar bolsa ilimitada
+            }
+            elseif (str_starts_with($tipoActividad, 'APP_B64:')) {
+                // ── El nombre de la app viene en base64 desde el frontend
+                //    para soportar apps con espacios y símbolos ("WhatsApp Business", "Disney+", etc.)
+                $nombreApp = base64_decode(substr($tipoActividad, 8));
+                $tasaPorSegundo = 1.0;
+
+                // ── Consulta dinámica: busca en BD si el usuario tiene una bolsa activa
+                //    que incluya esta app como exenta (sin importar qué app sea)
                 $bolsaActiva = DB::table('servicios.Bolsa_Activa')
-                    ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                    ->join(
+                        'servicios.App_Exenta_En_Bolsa',
+                        'servicios.Bolsa_Activa.id_paquete',
+                        '=',
+                        'servicios.App_Exenta_En_Bolsa.id_paquete'
+                    )
                     ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
                     ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
-                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
-                    ->select('servicios.Bolsa_Activa.id_bolsa_activa')
+                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
+                    ->select(
+                        'servicios.Bolsa_Activa.id_bolsa_activa',
+                        'servicios.App_Exenta_En_Bolsa.nombre_app as nombre_real'
+                    )
                     ->first();
 
                 if ($bolsaActiva) {
                     $cantidadCobrar = 0;
                     $idBolsaIlimitada = $bolsaActiva->id_bolsa_activa;
-                    $mensaje = "Usaste $nombreApp por $segundos segundos. ¡Te salió 100% GRATIS!";
+                    $nombreReal = $bolsaActiva->nombre_real;
+                    $mensaje = "Usaste $nombreReal por $segundos segundos. ¡Te salió 100% GRATIS (bolsa ilimitada activa)!";
                 } else {
                     $cantidadCobrar = $segundos * $tasaPorSegundo;
-                    $mensaje = "Usaste $nombreApp sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
+                    $mensaje = "Usaste $nombreApp por $segundos segundos sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
                 }
             }
 
@@ -153,5 +176,42 @@ class SimuladorTrafico extends Page
             DB::rollBack();
             Notification::make()->title('Error al enviar SMS')->body($e->getMessage())->danger()->send();
         }
+    }
+
+    public function getMaxSegundos($tipoActividad)
+    {
+        $user = auth()->user();
+        $linea = Linea::where('id_cliente', $user->id_cliente)->first();
+        if (!$linea) return 0;
+
+        $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->first();
+        if (!$bolsillo) return 0;
+
+        if ($tipoActividad === 'DATOS_GENERAL') {
+            return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+        }
+        
+        if ($tipoActividad === 'VOZ') {
+            return $bolsillo->saldo_minutos > 0 ? floor($bolsillo->saldo_minutos) : 0;
+        }
+
+        if (str_starts_with($tipoActividad, 'APP_B64:')) {
+            $nombreApp = base64_decode(substr($tipoActividad, 8));
+            
+            $bolsaActiva = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
+                ->first();
+
+            if ($bolsaActiva) {
+                return 999999; // Ilimitado
+            } else {
+                return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+            }
+        }
+
+        return 0;
     }
 }

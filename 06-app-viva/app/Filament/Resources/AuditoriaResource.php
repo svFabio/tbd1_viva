@@ -21,7 +21,7 @@ class AuditoriaResource extends Resource
 
     public static function canAccess(): bool
     {
-        return true; // Dejamos pasar al frontend para que la BD lo reviente
+        return auth()->user()?->rol_db === 'rol_auditor';
     }
 
     public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist

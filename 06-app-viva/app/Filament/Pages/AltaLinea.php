@@ -59,6 +59,19 @@ class AltaLinea extends Page implements HasForms
                         TextInput::make('correo')
                             ->email()
                             ->maxLength(100),
+                        Select::make('ciudad')
+                            ->options([
+                                'La Paz' => 'La Paz',
+                                'Cochabamba' => 'Cochabamba',
+                                'Santa Cruz' => 'Santa Cruz',
+                                'Oruro' => 'Oruro',
+                                'Tarija' => 'Tarija',
+                                'Potosí' => 'Potosí',
+                                'Chuquisaca' => 'Chuquisaca',
+                                'Beni' => 'Beni',
+                                'Pando' => 'Pando',
+                            ])
+                            ->required(),
                     ])->columns(2),
 
                 Section::make('Datos de la Línea y Plan')
@@ -101,7 +114,8 @@ class AltaLinea extends Page implements HasForms
             // 1. Insertar Cliente
             $clienteId = DB::table('clientes.Cliente')->insertGetId([
                 'fecha_registro' => now(),
-                'estado' => 'Activo'
+                'estado' => 'Activo',
+                'ciudad' => $data['ciudad']
             ], 'id_cliente');
 
             // 2. Insertar Persona Natural

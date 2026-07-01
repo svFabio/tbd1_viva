@@ -41,24 +41,24 @@
     <div class="mt-6">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             <svg class="h-5 w-5" style="color: {{ $rolMeta['hex'] }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            Resumen operativo — {{ $rolMeta['nombre'] }}
+            Resumen operativo &mdash; {{ $rolMeta['nombre'] }}
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($estadisticas as $label => $valor)
-            <div class="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md hover:border-opacity-80">
+            <div class="group relative overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md">
                 {{-- Accent strip en el borde izquierdo --}}
                 <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background-color: {{ $rolMeta['hex'] }};"></div>
-                <div class="pl-2">
-                    {{-- Ícono pequeño con color del rol --}}
-                    <div class="flex items-center justify-between mb-3">
+                <div class="pl-6 pr-5 py-5">
+                    {{-- Label e ícono --}}
+                    <div class="flex items-center justify-between mb-2">
                         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $label }}</p>
-                        <div class="h-8 w-8 rounded-lg flex items-center justify-center" style="background-color: {{ $rolMeta['hex'] }}18;">
+                        <div class="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: {{ $rolMeta['hex'] }}18;">
                             <svg class="h-4 w-4" style="color: {{ $rolMeta['hex'] }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                         </div>
                     </div>
                     <p class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ $valor }}</p>
                     {{-- Barra animada al hover --}}
-                    <div class="mt-4 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-full opacity-40" style="background-color: {{ $rolMeta['hex'] }};"></div>
+                    <div class="mt-4 h-0.5 w-8 rounded-full transition-all duration-500 group-hover:w-full opacity-30" style="background-color: {{ $rolMeta['hex'] }};"></div>
                 </div>
             </div>
             @endforeach

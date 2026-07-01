@@ -77,29 +77,14 @@ class AltaLinea extends Page implements HasForms
                                                 $set('correo', $persona->correo);
                                                 $set('ciudad', $cliente->ciudad);
                                             }
-                                            
-                                            // Check credentials
-                                            $user = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $state)->first();
-                                            if ($user) {
-                                                $set('has_credentials', true);
-                                                $set('existing_username', $user->username);
-                                            } else {
-                                                $set('has_credentials', false);
-                                                $set('existing_username', null);
-                                            }
                                         } else {
                                             $set('nombre', null);
                                             $set('apellido', null);
                                             $set('ci', null);
                                             $set('correo', null);
                                             $set('ciudad', null);
-                                            $set('has_credentials', false);
-                                            $set('existing_username', null);
                                         }
                                     }),
-
-                                Hidden::make('has_credentials')
-                                    ->default(false),
                                 
                                 Section::make('Detalle del Cliente')
                                     ->schema([
@@ -111,34 +96,6 @@ class AltaLinea extends Page implements HasForms
                                     ])
                                     ->columns(2)
                                     ->visible(fn ($get) => $get('persona_natural_id') !== null),
-
-                                Section::make('Credenciales Web (Para usar App Mi VIVA)')
-                                    ->schema([
-                                        TextInput::make('existing_username')
-                                            ->label('Nombre de Usuario Registrado')
-                                            ->disabled()
-                                            ->visible(fn ($get) => $get('has_credentials') === true),
-
-                                        TextInput::make('username')
-                                            ->label('Nombre de Usuario Nuevo')
-                                            ->required(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true)
-                                            ->maxLength(50)
-                                            ->unique(config('database.default') . '.' . (new User())->getTable(), 'username')
-                                            ->visible(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true),
-
-                                        TextInput::make('password')
-                                            ->password()
-                                            ->required(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true)
-                                            ->confirmed()
-                                            ->visible(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true),
-
-                                        TextInput::make('password_confirmation')
-                                            ->password()
-                                            ->required(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true)
-                                            ->visible(fn ($get) => $get('persona_natural_id') !== null && $get('has_credentials') !== true),
-                                    ])
-                                    ->visible(fn ($get) => $get('persona_natural_id') !== null)
-                                    ->columns(3),
                             ]),
 
                         Tab::make('Empresa')
@@ -162,11 +119,6 @@ class AltaLinea extends Page implements HasForms
                                             $set('ci', null);
                                             $set('correo', null);
                                             $set('ciudad', null);
-                                            $set('has_credentials', false);
-                                            $set('existing_username', null);
-                                            $set('username', null);
-                                            $set('password', null);
-                                            $set('password_confirmation', null);
 
                                             $empresa = DB::table('clientes.Empresa')->where('id_cliente', $state)->first();
                                             $cliente = DB::table('clientes.Cliente')->where('id_cliente', $state)->first();
@@ -207,6 +159,22 @@ class AltaLinea extends Page implements HasForms
                             ->required()
                             ->searchable(),
                     ]),
+
+                Section::make('Credenciales Web (Para usar App Mi VIVA)')
+                    ->schema([
+                        TextInput::make('username')
+                            ->label('Nombre de Usuario')
+                            ->required()
+                            ->maxLength(50)
+                            ->unique(config('database.default') . '.' . (new User())->getTable(), 'username'),
+                        TextInput::make('password')
+                            ->password()
+                            ->required()
+                            ->confirmed(),
+                        TextInput::make('password_confirmation')
+                            ->password()
+                            ->required(),
+                    ])->columns(3),
             ])
             ->statePath('data');
     }
@@ -272,9 +240,8 @@ class AltaLinea extends Page implements HasForms
                 'saldo_sms' => 0
             ]);
 
-            // 4. Crear su Usuario de App si es Persona Natural y no posee credenciales web
-            if ($esPersonaNatural && !empty($data['username'])) {
-                // Verificar doblemente que no se inserte un duplicado de id_cliente en seguridad.Usuario_Sistema
+            // 4. Crear o actualizar su Usuario de App
+            if (!empty($data['username'])) {
                 $exists = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $clienteId)->exists();
                 if (!$exists) {
                     User::create([
@@ -282,6 +249,13 @@ class AltaLinea extends Page implements HasForms
                         'password_hash' => Hash::make($data['password']),
                         'id_cliente' => $clienteId
                     ]);
+                } else {
+                    DB::table('seguridad.Usuario_Sistema')
+                        ->where('id_cliente', $clienteId)
+                        ->update([
+                            'username' => $data['username'],
+                            'password_hash' => Hash::make($data['password'])
+                        ]);
                 }
             }
 

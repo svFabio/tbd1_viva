@@ -42,43 +42,50 @@ class BolsilloWidget extends BaseWidget
             ];
         }
 
-        // 3. Devolver las estadísticas en formato bonito
-        $stats = [
+        // 3. Obtener la fecha de caducidad más lejana de todos los paquetes activos
+        $maxFechaExpiracion = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
+            ->where('id_linea', $linea->id_linea)
+            ->where('fecha_expiracion', '>', \Carbon\Carbon::now())
+            ->max('fecha_expiracion');
+
+        $vencimientoTexto = $maxFechaExpiracion 
+            ? 'Vence: ' . \Carbon\Carbon::parse($maxFechaExpiracion)->format('d/m/Y H:i') 
+            : 'Sin paquetes vigentes (Saldos inactivos)';
+
+        // Si no hay paquetes vigentes, el saldo se congela o pierde (mostramos 0)
+        $megas = $maxFechaExpiracion ? $bolsillo->saldo_megas : 0;
+        $minutos = $maxFechaExpiracion ? $bolsillo->saldo_minutos : 0;
+        $sms = $maxFechaExpiracion ? $bolsillo->saldo_sms : 0;
+
+        // Si los saldos caducaron, podemos resetearlos en BD por limpieza (opcional)
+        if (!$maxFechaExpiracion && ($bolsillo->saldo_megas > 0 || $bolsillo->saldo_minutos > 0 || $bolsillo->saldo_sms > 0)) {
+            $bolsillo->saldo_megas = 0;
+            $bolsillo->saldo_minutos = 0;
+            $bolsillo->saldo_sms = 0;
+            $bolsillo->save();
+        }
+
+        // 4. Devolver las estadísticas en formato bonito
+        return [
             Stat::make('Crédito Disponible', 'Bs. ' . number_format($bolsillo->saldo_dinero, 2))
-                ->description('Línea: ' . $linea->numero_telefono)
+                ->description('Para compras y renovaciones')
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Megas Disponibles', number_format($bolsillo->saldo_megas, 0) . ' MB')
-                ->description('Para navegar')
+            Stat::make('Megas Disponibles', number_format($megas, 0) . ' MB')
+                ->description($vencimientoTexto)
                 ->icon('heroicon-o-globe-alt')
-                ->color('primary'),
+                ->color($maxFechaExpiracion ? 'primary' : 'danger'),
             
-            Stat::make('Minutos Disponibles', number_format($bolsillo->saldo_minutos, 0) . ' Min')
-                ->description('Para llamadas')
+            Stat::make('Minutos Disponibles', number_format($minutos, 0) . ' Min')
+                ->description($vencimientoTexto)
                 ->icon('heroicon-o-phone')
-                ->color('success'),
+                ->color($maxFechaExpiracion ? 'success' : 'danger'),
 
-            Stat::make('SMS Disponibles', number_format($bolsillo->saldo_sms ?? 0, 0) . ' SMS')
-                ->description('Mensajes de texto')
+            Stat::make('SMS Disponibles', number_format($sms, 0) . ' SMS')
+                ->description($vencimientoTexto)
                 ->icon('heroicon-o-chat-bubble-oval-left-ellipsis')
-                ->color('warning'),
+                ->color($maxFechaExpiracion ? 'warning' : 'danger'),
         ];
-
-        // 4. Buscar paquetes ilimitados activos (Bolsas Activas)
-        $bolsasActivas = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
-            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
-            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
-            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', \Carbon\Carbon::now())
-            ->get();
-
-        foreach ($bolsasActivas as $bolsa) {
-            $stats[] = Stat::make('Paquete Activo', $bolsa->nombre_paquete)
-                ->description('Vence: ' . \Carbon\Carbon::parse($bolsa->fecha_expiracion)->format('d/m/Y H:i'))
-                ->icon('heroicon-o-sparkles')
-                ->color('success');
-        }
-
-        return $stats;
     }
 }

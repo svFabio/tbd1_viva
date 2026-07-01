@@ -46,6 +46,13 @@ class SimuladorTrafico extends Page
         DB::beginTransaction();
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
+            
+            // Verificar vigencia de saldos
+            $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
+                ->where('id_linea', $linea->id_linea)
+                ->where('fecha_expiracion', '>', Carbon::now())
+                ->exists();
+
             $cantidadCobrar = 0;
             $tipoConsumoDB = 'Datos';
             $mensaje = "";
@@ -95,17 +102,17 @@ class SimuladorTrafico extends Page
                 }
             }
 
-            // Descontar del bolsillo (Bolsillo usa enteros, así que redondeamos)
+            // Descontar del bolsillo
             if ($tipoConsumoDB === 'Datos') {
-                $cobroBolsillo = (int) ceil($cantidadCobrar); // Si gastas 0.2 MB, te cobra 1 MB
-                if ($bolsillo->saldo_megas < $cobroBolsillo) {
-                    throw new \Exception("Megas Insuficientes. Intentaste consumir $cantidadCobrar MB pero solo tienes {$bolsillo->saldo_megas} MB.");
+                $cobroBolsillo = (int) ceil($cantidadCobrar);
+                if (!$tienePaqueteVigente || $bolsillo->saldo_megas < $cobroBolsillo) {
+                    throw new \Exception("Megas Insuficientes o caducados. Intentaste consumir $cantidadCobrar MB.");
                 }
                 $bolsillo->saldo_megas -= $cobroBolsillo;
             } elseif ($tipoConsumoDB === 'Voz') {
                 $cobroBolsillo = (int) ceil($cantidadCobrar);
-                if ($bolsillo->saldo_minutos < $cobroBolsillo) {
-                    throw new \Exception("Minutos Insuficientes. Necesitas $cantidadCobrar Min pero solo tienes {$bolsillo->saldo_minutos} Min.");
+                if (!$tienePaqueteVigente || $bolsillo->saldo_minutos < $cobroBolsillo) {
+                    throw new \Exception("Minutos Insuficientes o caducados. Necesitas $cantidadCobrar Min.");
                 }
                 $bolsillo->saldo_minutos -= $cobroBolsillo;
             }
@@ -141,12 +148,16 @@ class SimuladorTrafico extends Page
         DB::beginTransaction();
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
-            
-            // 1 SMS = 160 caracteres
-            $cantidadSms = (int) ceil($longitudMensaje / 160);
+            $cantidadSms = ceil($longitudMensaje / 160);
 
-            if ($bolsillo->saldo_sms >= $cantidadSms) {
-                // Descuenta de la bolsa
+            // Verificar vigencia de saldos
+            $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
+                ->where('id_linea', $linea->id_linea)
+                ->where('fecha_expiracion', '>', Carbon::now())
+                ->exists();
+
+            if ($tienePaqueteVigente && $bolsillo->saldo_sms >= $cantidadSms) {
+                // Cobrar del saldo de SMSla bolsa
                 $bolsillo->saldo_sms -= $cantidadSms;
                 $mensaje = "Enviaste un mensaje de $longitudMensaje letras. Te descontamos $cantidadSms SMS de tu paquete.";
             } else {
@@ -187,12 +198,18 @@ class SimuladorTrafico extends Page
         $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->first();
         if (!$bolsillo) return 0;
 
+        // Verificar si el cliente tiene al menos un paquete vigente
+        $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
+            ->where('id_linea', $linea->id_linea)
+            ->where('fecha_expiracion', '>', Carbon::now())
+            ->exists();
+
         if ($tipoActividad === 'DATOS_GENERAL') {
-            return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+            return ($bolsillo->saldo_megas > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_megas) : 0;
         }
         
         if ($tipoActividad === 'VOZ') {
-            return $bolsillo->saldo_minutos > 0 ? floor($bolsillo->saldo_minutos) : 0;
+            return ($bolsillo->saldo_minutos > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_minutos) : 0;
         }
 
         if (str_starts_with($tipoActividad, 'APP_B64:')) {
@@ -208,7 +225,7 @@ class SimuladorTrafico extends Page
             if ($bolsaActiva) {
                 return 999999; // Ilimitado
             } else {
-                return $bolsillo->saldo_megas > 0 ? floor($bolsillo->saldo_megas) : 0;
+                return ($bolsillo->saldo_megas > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_megas) : 0;
             }
         }
 

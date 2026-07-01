@@ -9,8 +9,16 @@ CREATE OR REPLACE FUNCTION finanzas.fn_actualizar_bolsillo_recarga()
 AS $function$
 DECLARE
     v_ya_recibio_bono BOOLEAN := FALSE;
+    v_promo_vigente BOOLEAN := FALSE;
     v_monto_final NUMERIC(10,2);
 BEGIN
+    -- 0. Verificar si la Promoción 1 (Doble Carga) está VIGENTE
+    SELECT EXISTS (
+        SELECT 1 FROM comercial."Promocion"
+        WHERE id_promocion = 1 
+          AND CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin
+    ) INTO v_promo_vigente;
+
     -- 1. Verificar si el cliente YA usó su bono este mes (buscando recargas anteriores con aplicar_bono = true)
     SELECT EXISTS (
         SELECT 1 FROM finanzas."Recarga"
@@ -22,7 +30,11 @@ BEGIN
 
     -- 2. Validar y Calcular el monto final a abonar
     IF NEW.aplicar_bono THEN
-        -- Seguridad a nivel de BD: si el cliente manda aplicar_bono=true pero ya lo usó este mes, BLOQUEAR.
+        -- Seguridad a nivel de BD: si el cliente manda aplicar_bono=true pero la promo no está vigente o ya la usó, BLOQUEAR.
+        IF NOT v_promo_vigente THEN
+            RAISE EXCEPTION 'Fraude bloqueado: La campaña de Doble Carga no está vigente actualmente.';
+        END IF;
+
         IF v_ya_recibio_bono THEN
             RAISE EXCEPTION 'Fraude bloqueado: El cliente ya utilizó su beneficio de Doble Carga este mes.';
         END IF;

@@ -11,6 +11,12 @@ class IngresosMensualesChart extends ChartWidget
     protected static ?string $heading = 'Ingresos Mensuales (Últimos 6 meses)';
     protected static ?int $sort = 2;
 
+    // Solo visible para el rol de reportes BI
+    public static function canView(): bool
+    {
+        return auth()->user()?->rol_db === 'rol_reporte';
+    }
+
     protected function getData(): array
     {
         $ingresos = [];

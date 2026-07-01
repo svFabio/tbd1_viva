@@ -608,7 +608,9 @@ INSERT INTO finanzas."Transaccion" (id_transaccion, id_linea, tipo_transaccion, 
 
 -- ============================================================
 -- ESQUEMA: comercial
--- ============================================================INSERT INTO comercial."Promocion" (id_promocion, nombre_promo, descripcion, fecha_inicio, fecha_fin) VALUES
+-- ============================================================
+
+INSERT INTO comercial."Promocion" (id_promocion, nombre_promo, descripcion, fecha_inicio, fecha_fin) VALUES
 (1, 'Doble Carga Mensual',        'Recarga y recibe el doble en saldo adicional',                  '2026-01-01 00:00:00', '2026-12-31 23:59:59'),
 (2, 'Numero Amigo 30 dias',       'Llama ilimitado a tus números amigos VIVA por 30 días',         '2026-01-01 00:00:00', '2026-12-31 23:59:59');
 

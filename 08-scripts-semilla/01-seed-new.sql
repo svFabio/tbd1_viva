@@ -608,62 +608,27 @@ INSERT INTO finanzas."Transaccion" (id_transaccion, id_linea, tipo_transaccion, 
 
 -- ============================================================
 -- ESQUEMA: comercial
--- ============================================================
-
-INSERT INTO comercial."Promocion" (id_promocion, nombre_promo, descripcion, fecha_inicio, fecha_fin) VALUES
-(1, 'Doble Carga Enero 2026',       'Recarga y recibe el doble en saldo adicional',                  '2026-01-01 00:00:00', '2026-01-31 23:59:59'),
-(2, 'Recarga Digital 25% Extra',    '25% adicional en recargas por APP o banca digital',             '2025-08-26 00:00:00', '2026-02-24 23:59:59'),
-(3, 'Bono Bienvenida Postpago',     'Bs 50 de saldo gratis al activar plan postpago por primera vez','2024-01-01 00:00:00', '2026-12-31 23:59:59'),
-(4, 'Doble Carga Abril 2026',       'Recarga y recibe el doble en saldo adicional',                  '2026-04-01 00:00:00', '2026-04-30 23:59:59'),
-(5, 'Pack WOW Finde Gratis',        'Bolsa WOW Fin de Semana gratis para clientes VIVA antiguos',    '2026-04-01 00:00:00', '2026-06-30 23:59:59'),
-(6, 'Numero Amigo 30 dias',         'Llama ilimitado a tu numero amigo VIVA por 30 dias',            '2026-01-01 00:00:00', '2026-12-31 23:59:59'),
-(7, 'Doble Carga Mayo 2026',        'Recarga y recibe el doble en saldo adicional',                  '2026-05-01 00:00:00', '2026-05-31 23:59:59');
+-- ============================================================INSERT INTO comercial."Promocion" (id_promocion, nombre_promo, descripcion, fecha_inicio, fecha_fin) VALUES
+(1, 'Doble Carga Mensual',        'Recarga y recibe el doble en saldo adicional',                  '2026-01-01 00:00:00', '2026-12-31 23:59:59'),
+(2, 'Numero Amigo 30 dias',       'Llama ilimitado a tus números amigos VIVA por 30 días',         '2026-01-01 00:00:00', '2026-12-31 23:59:59');
 
 INSERT INTO comercial."Condicion_Promocion" (id_condicion, id_promocion, descripcion_condicion) VALUES
-(1,  1, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(2,  1, 'Monto de recarga maximo Bs 200 para recibir el doble'),
-(3,  2, 'Recarga realizada por APP VIVA o banca digital'),
-(4,  2, 'Monto minimo de recarga Bs 10'),
-(5,  3, 'Solo aplica al activar un plan postpago por primera vez'),
-(6,  4, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(7,  4, 'Monto de recarga maximo Bs 200'),
-(8,  5, 'Antiguedad minima de 12 meses como cliente VIVA'),
-(9,  6, 'Ambas lineas deben ser de la red VIVA Bolivia'),
-(10, 6, 'Linea origen debe tener saldo suficiente para activar el servicio'),
-(11, 7, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(12, 7, 'Monto de recarga maximo Bs 200');
+(1,  1, 'Monto de recarga máximo Bs 200 para recibir el doble'),
+(2,  1, 'Válido una vez por mes calendario'),
+(3,  2, 'Ambas líneas deben ser de la red VIVA Bolivia');
 
 INSERT INTO comercial."Promocion_Linea" (id_promo_linea, id_promocion, id_linea, fecha_aplicacion) VALUES
-(1, 1, 1, '2026-01-15 09:10:00'), 
-(2, 6, 13, '2026-02-20 10:00:00'), 
-(3, 6, 16, '2026-03-25 14:00:00'),
-(4, 3, 2, '2026-04-15 14:22:00'), 
-(5, 7, 10, '2026-05-18 09:00:00'),
-(6,  3, 2,  '2021-07-22 10:15:00'),
-(7,  3, 4,  '2022-04-05 14:20:00'),
-(8,  3, 8,  '2023-05-20 13:30:00'),
-(9,  4, 1,  '2026-04-15 09:00:00'),
-(10, 4, 13, '2026-04-20 14:00:00'),
-(11, 4, 20, '2026-04-01 09:00:00'),
-(12, 5, 10, '2026-05-17 00:00:00'),
-(13, 5, 15, '2026-05-17 00:00:00'),
-(14, 6, 1,  '2026-02-01 10:00:00'),
-(15, 6, 7,  '2026-03-01 10:00:00'),
-(16, 7, 1,  '2026-05-01 09:10:00'),
-(17, 7, 5,  '2026-05-15 13:00:00'),
-(18, 7, 23, '2026-05-08 09:00:00');
--- Ahora sí, los números amigos amarrados a la promoción ID 2 y 3
+(1, 1, 1,  '2026-06-15 09:10:00'), -- Doble Carga para linea 1
+(2, 2, 1,  '2026-06-01 10:00:00'), -- Numero amigo para linea 1
+(3, 2, 7,  '2026-06-05 14:00:00'), -- Numero amigo para linea 7
+(4, 2, 13, '2026-06-10 09:00:00'); -- Numero amigo para linea 13
+
+-- Ahora sí, los números amigos amarrados a la promoción_linea correspondiente
 INSERT INTO comercial."Numero_Amigo" (id_numero_amigo, id_linea_origen, id_linea_destino, id_promo_linea) VALUES
-(1, 1,  5,  14), -- Línea 1 vinculada a la promo-línea 14
-(2, 1,  3,  14), -- Línea 1 vinculada a la promo-línea 14
-(3, 7,  10, 15), -- Línea 7 vinculada a la promo-línea 15
-(4, 13, 16, 10), -- Línea 13 vinculada a la promo-línea 10 (Cambiado de NULL a 10)
-(5, 20, 21, 11), -- Línea 20 vinculada a la promo-línea 11 (Cambiado de NULL a 11)
-(6, 23, 25, 18), -- Línea 23 vinculada a la promo-línea 18 (Cambiado de NULL a 18)
-(7, 3,  7,  2),  -- Línea 3 vinculada a la promo-línea 2 (Cambiado de NULL a 2)
-(8, 11, 12, 1),  -- Vinculado a la promo-línea 1 (Cambiado de NULL a 1)
-(9, 22, 24, 4),  -- Vinculado a la promo-línea 4 (Cambiado de NULL a 4)
-(10, 17, 18, 6); -- Vinculado a la promo-línea 6 (Cambiado de NULL a 6)
+(1, 1,  5,  2), -- Línea 1 vinculada a la promo-línea 2
+(2, 1,  3,  2), -- Línea 1 vinculada a la promo-línea 2
+(3, 7,  10, 3), -- Línea 7 vinculada a la promo-línea 3
+(4, 13, 16, 4); -- Línea 13 vinculada a la promo-línea 4
 
 -- ============================================================
 -- ESQUEMA: fidelizacion

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClienteResource\Pages;
+use App\Filament\Resources\ClienteResource\RelationManagers;
 use App\Models\Cliente;
 use App\Models\PersonaNatural;
 use App\Models\Empresa;
@@ -225,7 +226,6 @@ class ClienteResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 // No bulk actions for safety
@@ -235,7 +235,7 @@ class ClienteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\LineasRelationManager::class,
         ];
     }
 

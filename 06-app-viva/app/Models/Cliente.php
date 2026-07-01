@@ -21,5 +21,10 @@ class Cliente extends Model
     {
         return $this->hasOne(Empresa::class, 'id_cliente', 'id_cliente');
     }
+
+    public function lineas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Linea::class, 'id_cliente', 'id_cliente');
+    }
 }
 

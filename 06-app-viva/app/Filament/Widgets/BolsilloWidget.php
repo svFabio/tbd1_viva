@@ -73,19 +73,19 @@ class BolsilloWidget extends BaseWidget
                 ->color('success'),
 
             Stat::make('Megas Disponibles', number_format($megas, 0) . ' MB')
-                ->description($vencimientoTexto)
+                ->description($megas > 0 ? $vencimientoTexto : 'Sin megas')
                 ->icon('heroicon-o-globe-alt')
-                ->color($maxFechaExpiracion ? 'primary' : 'danger'),
+                ->color($megas > 0 ? 'primary' : 'gray'),
             
             Stat::make('Minutos Disponibles', number_format($minutos, 0) . ' Min')
-                ->description($vencimientoTexto)
+                ->description($minutos > 0 ? $vencimientoTexto : 'Sin minutos')
                 ->icon('heroicon-o-phone')
-                ->color($maxFechaExpiracion ? 'success' : 'danger'),
+                ->color($minutos > 0 ? 'success' : 'gray'),
 
             Stat::make('SMS Disponibles', number_format($sms, 0) . ' SMS')
-                ->description($vencimientoTexto)
+                ->description($sms > 0 ? $vencimientoTexto : 'Sin SMS')
                 ->icon('heroicon-o-chat-bubble-oval-left-ellipsis')
-                ->color($maxFechaExpiracion ? 'warning' : 'danger'),
+                ->color($sms > 0 ? 'warning' : 'gray'),
         ];
     }
 }

@@ -47,10 +47,19 @@ class SimuladorTrafico extends Page
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
             
-            // Verificar vigencia de saldos
-            $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
-                ->where('id_linea', $linea->id_linea)
-                ->where('fecha_expiracion', '>', Carbon::now())
+            // Verificar vigencia de saldos por tipo de paquete
+            $tienePaqueteMegas = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.megas', '>', 0)
+                ->exists();
+
+            $tienePaqueteMinutos = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.minutos', '>', 0)
                 ->exists();
 
             $cantidadCobrar = 0;
@@ -105,13 +114,13 @@ class SimuladorTrafico extends Page
             // Descontar del bolsillo
             if ($tipoConsumoDB === 'Datos') {
                 $cobroBolsillo = (int) ceil($cantidadCobrar);
-                if (!$tienePaqueteVigente || $bolsillo->saldo_megas < $cobroBolsillo) {
+                if (!$tienePaqueteMegas || $bolsillo->saldo_megas < $cobroBolsillo) {
                     throw new \Exception("Megas Insuficientes o caducados. Intentaste consumir $cantidadCobrar MB.");
                 }
                 $bolsillo->saldo_megas -= $cobroBolsillo;
             } elseif ($tipoConsumoDB === 'Voz') {
                 $cobroBolsillo = (int) ceil($cantidadCobrar);
-                if (!$tienePaqueteVigente || $bolsillo->saldo_minutos < $cobroBolsillo) {
+                if (!$tienePaqueteMinutos || $bolsillo->saldo_minutos < $cobroBolsillo) {
                     throw new \Exception("Minutos Insuficientes o caducados. Necesitas $cantidadCobrar Min.");
                 }
                 $bolsillo->saldo_minutos -= $cobroBolsillo;
@@ -150,13 +159,15 @@ class SimuladorTrafico extends Page
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
             $cantidadSms = ceil($longitudMensaje / 160);
 
-            // Verificar vigencia de saldos
-            $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
-                ->where('id_linea', $linea->id_linea)
-                ->where('fecha_expiracion', '>', Carbon::now())
+            // Verificar vigencia de saldo SMS
+            $tienePaqueteSms = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.sms', '>', 0)
                 ->exists();
 
-            if ($tienePaqueteVigente && $bolsillo->saldo_sms >= $cantidadSms) {
+            if ($tienePaqueteSms && $bolsillo->saldo_sms >= $cantidadSms) {
                 // Cobrar del saldo de SMSla bolsa
                 $bolsillo->saldo_sms -= $cantidadSms;
                 $mensaje = "Enviaste un mensaje de $longitudMensaje letras. Te descontamos $cantidadSms SMS de tu paquete.";
@@ -198,18 +209,27 @@ class SimuladorTrafico extends Page
         $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->first();
         if (!$bolsillo) return 0;
 
-        // Verificar si el cliente tiene al menos un paquete vigente
-        $tienePaqueteVigente = DB::table('servicios.Bolsa_Activa')
-            ->where('id_linea', $linea->id_linea)
-            ->where('fecha_expiracion', '>', Carbon::now())
+        // Verificar vigencias independientes
+        $tienePaqueteMegas = DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+            ->where('servicios.Paquete.megas', '>', 0)
+            ->exists();
+            
+        $tienePaqueteMinutos = DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+            ->where('servicios.Paquete.minutos', '>', 0)
             ->exists();
 
         if ($tipoActividad === 'DATOS_GENERAL') {
-            return ($bolsillo->saldo_megas > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_megas) : 0;
+            return ($bolsillo->saldo_megas > 0 && $tienePaqueteMegas) ? floor($bolsillo->saldo_megas) : 0;
         }
         
         if ($tipoActividad === 'VOZ') {
-            return ($bolsillo->saldo_minutos > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_minutos) : 0;
+            return ($bolsillo->saldo_minutos > 0 && $tienePaqueteMinutos) ? floor($bolsillo->saldo_minutos) : 0;
         }
 
         if (str_starts_with($tipoActividad, 'APP_B64:')) {
@@ -225,7 +245,7 @@ class SimuladorTrafico extends Page
             if ($bolsaActiva) {
                 return 999999; // Ilimitado
             } else {
-                return ($bolsillo->saldo_megas > 0 && $tienePaqueteVigente) ? floor($bolsillo->saldo_megas) : 0;
+                return ($bolsillo->saldo_megas > 0 && $tienePaqueteMegas) ? floor($bolsillo->saldo_megas) : 0;
             }
         }
 

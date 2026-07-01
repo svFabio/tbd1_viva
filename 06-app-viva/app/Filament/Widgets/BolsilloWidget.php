@@ -42,28 +42,43 @@ class BolsilloWidget extends BaseWidget
             ];
         }
 
-        // 3. Obtener la fecha de caducidad más lejana de todos los paquetes activos
-        $maxFechaExpiracion = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
-            ->where('id_linea', $linea->id_linea)
-            ->where('fecha_expiracion', '>', \Carbon\Carbon::now())
-            ->max('fecha_expiracion');
+        // 3. Obtener la fecha de caducidad por tipo de beneficio
+        $maxFechaMegas = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', \Carbon\Carbon::now())
+            ->where('servicios.Paquete.megas', '>', 0)
+            ->max('servicios.Bolsa_Activa.fecha_expiracion');
 
-        $vencimientoTexto = $maxFechaExpiracion 
-            ? 'Vence: ' . \Carbon\Carbon::parse($maxFechaExpiracion)->format('d/m/Y H:i') 
-            : 'Sin paquetes vigentes (Saldos inactivos)';
+        $maxFechaMinutos = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', \Carbon\Carbon::now())
+            ->where('servicios.Paquete.minutos', '>', 0)
+            ->max('servicios.Bolsa_Activa.fecha_expiracion');
 
-        // Si no hay paquetes vigentes, el saldo se congela o pierde (mostramos 0)
-        $megas = $maxFechaExpiracion ? $bolsillo->saldo_megas : 0;
-        $minutos = $maxFechaExpiracion ? $bolsillo->saldo_minutos : 0;
-        $sms = $maxFechaExpiracion ? $bolsillo->saldo_sms : 0;
+        $maxFechaSms = \Illuminate\Support\Facades\DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', \Carbon\Carbon::now())
+            ->where('servicios.Paquete.sms', '>', 0)
+            ->max('servicios.Bolsa_Activa.fecha_expiracion');
 
-        // Si los saldos caducaron, podemos resetearlos en BD por limpieza (opcional)
-        if (!$maxFechaExpiracion && ($bolsillo->saldo_megas > 0 || $bolsillo->saldo_minutos > 0 || $bolsillo->saldo_sms > 0)) {
-            $bolsillo->saldo_megas = 0;
-            $bolsillo->saldo_minutos = 0;
-            $bolsillo->saldo_sms = 0;
-            $bolsillo->save();
-        }
+        $vencimientoMegas = $maxFechaMegas ? 'Vence: ' . \Carbon\Carbon::parse($maxFechaMegas)->format('d/m/Y H:i') : 'Sin megas';
+        $vencimientoMinutos = $maxFechaMinutos ? 'Vence: ' . \Carbon\Carbon::parse($maxFechaMinutos)->format('d/m/Y H:i') : 'Sin minutos';
+        $vencimientoSms = $maxFechaSms ? 'Vence: ' . \Carbon\Carbon::parse($maxFechaSms)->format('d/m/Y H:i') : 'Sin SMS';
+
+        // Si no hay paquetes vigentes que den ese beneficio, el saldo se asume 0
+        $megas = $maxFechaMegas ? $bolsillo->saldo_megas : 0;
+        $minutos = $maxFechaMinutos ? $bolsillo->saldo_minutos : 0;
+        $sms = $maxFechaSms ? $bolsillo->saldo_sms : 0;
+
+        // Limpieza BD (si un beneficio caducó, se borra su saldo independientemente)
+        $guardar = false;
+        if (!$maxFechaMegas && $bolsillo->saldo_megas > 0) { $bolsillo->saldo_megas = 0; $guardar = true; }
+        if (!$maxFechaMinutos && $bolsillo->saldo_minutos > 0) { $bolsillo->saldo_minutos = 0; $guardar = true; }
+        if (!$maxFechaSms && $bolsillo->saldo_sms > 0) { $bolsillo->saldo_sms = 0; $guardar = true; }
+        if ($guardar) { $bolsillo->save(); }
 
         // 4. Devolver las estadísticas en formato bonito
         return [
@@ -73,17 +88,17 @@ class BolsilloWidget extends BaseWidget
                 ->color('success'),
 
             Stat::make('Megas Disponibles', number_format($megas, 0) . ' MB')
-                ->description($megas > 0 ? $vencimientoTexto : 'Sin megas')
+                ->description($vencimientoMegas)
                 ->icon('heroicon-o-globe-alt')
                 ->color($megas > 0 ? 'primary' : 'gray'),
             
             Stat::make('Minutos Disponibles', number_format($minutos, 0) . ' Min')
-                ->description($minutos > 0 ? $vencimientoTexto : 'Sin minutos')
+                ->description($vencimientoMinutos)
                 ->icon('heroicon-o-phone')
                 ->color($minutos > 0 ? 'success' : 'gray'),
 
             Stat::make('SMS Disponibles', number_format($sms, 0) . ' SMS')
-                ->description($sms > 0 ? $vencimientoTexto : 'Sin SMS')
+                ->description($vencimientoSms)
                 ->icon('heroicon-o-chat-bubble-oval-left-ellipsis')
                 ->color($sms > 0 ? 'warning' : 'gray'),
         ];

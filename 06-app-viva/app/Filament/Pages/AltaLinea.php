@@ -160,20 +160,18 @@ class AltaLinea extends Page implements HasForms
                             ->searchable(),
                     ]),
 
-                Section::make('Credenciales Web (Para usar App Mi VIVA)')
+                Section::make('Credenciales de Acceso (App Mi VIVA)')
                     ->schema([
-                        TextInput::make('username')
-                            ->label('Nombre de Usuario')
-                            ->required()
-                            ->maxLength(50),
                         TextInput::make('password')
+                            ->label('Contraseña')
                             ->password()
                             ->required()
                             ->confirmed(),
                         TextInput::make('password_confirmation')
+                            ->label('Confirmar Contraseña')
                             ->password()
                             ->required(),
-                    ])->columns(3),
+                    ])->columns(2),
             ])
             ->statePath('data');
     }
@@ -199,22 +197,6 @@ class AltaLinea extends Page implements HasForms
                 ->send();
             return;
         }
-        // Validar que el username no esté en uso (bajo rol_agencia que ahora sí tiene SELECT en seguridad)
-        if (!empty($data['username'])) {
-            $usernameEnUso = DB::table('seguridad.Usuario_Sistema')
-                ->where('username', $data['username'])
-                ->exists();
-
-            if ($usernameEnUso) {
-                Notification::make()
-                    ->title('Usuario ya existe')
-                    ->body("El nombre de usuario '{$data['username']}' ya está en uso. Elige otro.")
-                    ->danger()
-                    ->send();
-                return;
-            }
-        }
-
         try {
             DB::beginTransaction();
 
@@ -255,22 +237,22 @@ class AltaLinea extends Page implements HasForms
             ]);
 
             // 4. Crear o actualizar su Usuario de App
-            if (!empty($data['username'])) {
-                $exists = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $clienteId)->exists();
-                if (!$exists) {
-                    User::create([
-                        'username' => $data['username'],
-                        'password_hash' => Hash::make($data['password']),
-                        'id_cliente' => $clienteId
+            // El username se genera automáticamente a partir del número de teléfono asignado
+            $usernameGenerado = $numeroTelefono;
+            $exists = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $clienteId)->exists();
+            if (!$exists) {
+                User::create([
+                    'username'      => $usernameGenerado,
+                    'password_hash' => Hash::make($data['password']),
+                    'id_cliente'    => $clienteId
+                ]);
+            } else {
+                DB::table('seguridad.Usuario_Sistema')
+                    ->where('id_cliente', $clienteId)
+                    ->update([
+                        'username'      => $usernameGenerado,
+                        'password_hash' => Hash::make($data['password'])
                     ]);
-                } else {
-                    DB::table('seguridad.Usuario_Sistema')
-                        ->where('id_cliente', $clienteId)
-                        ->update([
-                            'username' => $data['username'],
-                            'password_hash' => Hash::make($data['password'])
-                        ]);
-                }
             }
 
             DB::commit();

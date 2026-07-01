@@ -33,23 +33,7 @@ class Login extends BaseLogin
                     ->reactive(),
 
                 // ─── SECCIÓN CLIENTE ───────────────────────────────────────
-                // Sub-toggle: el cliente elige cómo identificarse
-                \Filament\Forms\Components\ToggleButtons::make('cliente_id_tipo')
-                    ->label('Iniciar sesión con')
-                    ->options([
-                        'numero'  => 'Número de celular',
-                        'usuario' => 'Usuario / Correo',
-                    ])
-                    ->icons([
-                        'numero'  => 'heroicon-o-phone',
-                        'usuario' => 'heroicon-o-at-symbol',
-                    ])
-                    ->grouped()
-                    ->default('numero')
-                    ->reactive()
-                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular'),
-
-                // Campo: Número de celular (opción principal del cliente)
+                // Campo: Número de celular (única opción para clientes)
                 \Filament\Forms\Components\TextInput::make('celular')
                     ->label('Número de Celular')
                     ->placeholder('Ej: 70123456')
@@ -61,16 +45,8 @@ class Login extends BaseLogin
                     ->tel()
                     ->minLength(8)
                     ->maxLength(8)
-                    ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'numero')
-                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'numero'),
-
-                // Campo: Username o correo (opción alternativa del cliente)
-                \Filament\Forms\Components\TextInput::make('cliente_identificador')
-                    ->label('Usuario o Correo Electrónico')
-                    ->placeholder('mi_usuario o correo@gmail.com')
-                    ->autocomplete('username')
-                    ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'usuario')
-                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'usuario'),
+                    ->required(fn (callable $get) => $get('login_type') === 'celular')
+                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular'),
 
                 // ─── SECCIÓN ADMINISTRADOR ─────────────────────────────────
                 \Filament\Forms\Components\TextInput::make('identificador')
@@ -95,38 +71,17 @@ class Login extends BaseLogin
 
         // ── CLIENTE VIVA ──────────────────────────────────────────────
         if ($login_type === 'celular') {
-            $cliente_id_tipo = $data['cliente_id_tipo'] ?? 'numero';
-
-            if ($cliente_id_tipo === 'numero') {
-                // Login por número de celular
-                $numero = '591' . trim($data['celular'] ?? '');
-                if (preg_match('/^591([0-9]{8})$/', $numero, $matches)) {
-                    $linea = DB::table('lineas.Linea')->where('numero_telefono', $matches[1])->first();
-                    if ($linea) {
-                        $id_cliente = $linea->id_cliente;
-                    }
-                } else {
-                    throw ValidationException::withMessages([
-                        'data.celular' => 'El número debe tener 8 dígitos.',
-                    ]);
+            // Login por número de celular (única opción disponible)
+            $numero = '591' . trim($data['celular'] ?? '');
+            if (preg_match('/^591([0-9]{8})$/', $numero, $matches)) {
+                $linea = DB::table('lineas.Linea')->where('numero_telefono', $matches[1])->first();
+                if ($linea) {
+                    $id_cliente = $linea->id_cliente;
                 }
             } else {
-                // Login por username o correo
-                $identificador = trim($data['cliente_identificador'] ?? '');
-                if (filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
-                    $persona = DB::table('clientes.Persona_Natural')->where('correo', $identificador)->first();
-                    if ($persona) {
-                        $id_cliente = $persona->id_cliente;
-                    }
-                } else {
-                    $usuario = DB::table('seguridad.Usuario_Sistema')
-                        ->where('username', $identificador)
-                        ->whereNotNull('id_cliente')
-                        ->first();
-                    if ($usuario) {
-                        $id_cliente = $usuario->id_cliente;
-                    }
-                }
+                throw ValidationException::withMessages([
+                    'data.celular' => 'El número debe tener 8 dígitos.',
+                ]);
             }
 
             // Buscamos el username de autenticación a partir del id_cliente

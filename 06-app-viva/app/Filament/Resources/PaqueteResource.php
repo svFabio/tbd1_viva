@@ -16,6 +16,7 @@ class PaqueteResource extends Resource
     protected static ?string $model = Paquete::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
+    protected static ?string $navigationGroup = 'Comercial y Servicios';
     protected static ?string $navigationLabel = 'Gestión de Paquetes';
     protected static ?string $pluralModelLabel = 'Paquetes';
 

@@ -197,6 +197,20 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON lineas."Historial_Linea_Equipo" TO rol_a
 
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA clientes, lineas TO rol_agencia;
 
+-- seguridad (acceso mínimo para crear el usuario web del nuevo cliente)
+-- rol_agencia solo puede: verificar si un username ya existe (SELECT),
+-- crear el usuario del cliente recién dado de alta (INSERT),
+-- y actualizarlo si el cliente ya tenía cuenta (UPDATE username/password).
+-- NO puede ver usuarios de otros roles ni administradores.
+GRANT USAGE ON SCHEMA seguridad TO rol_agencia;
+GRANT SELECT, INSERT, UPDATE ON seguridad."Usuario_Sistema" TO rol_agencia;
+GRANT USAGE, SELECT ON SEQUENCE seguridad."Usuario_Sistema_id_usuario_seq" TO rol_agencia;
+
+-- finanzas (para crear el Bolsillo al dar de alta la línea)
+GRANT USAGE ON SCHEMA finanzas TO rol_agencia;
+GRANT INSERT ON finanzas."Bolsillo" TO rol_agencia;
+GRANT USAGE, SELECT ON SEQUENCE finanzas."Bolsillo_id_bolsillo_seq" TO rol_agencia;
+
 -- =============================================================
 -- ROL: u_admin_web
 -- =============================================================

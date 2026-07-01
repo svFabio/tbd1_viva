@@ -165,8 +165,7 @@ class AltaLinea extends Page implements HasForms
                         TextInput::make('username')
                             ->label('Nombre de Usuario')
                             ->required()
-                            ->maxLength(50)
-                            ->unique(config('database.default') . '.' . (new User())->getTable(), 'username'),
+                            ->maxLength(50),
                         TextInput::make('password')
                             ->password()
                             ->required()
@@ -199,6 +198,21 @@ class AltaLinea extends Page implements HasForms
                 ->danger()
                 ->send();
             return;
+        }
+        // Validar que el username no esté en uso (bajo rol_agencia que ahora sí tiene SELECT en seguridad)
+        if (!empty($data['username'])) {
+            $usernameEnUso = DB::table('seguridad.Usuario_Sistema')
+                ->where('username', $data['username'])
+                ->exists();
+
+            if ($usernameEnUso) {
+                Notification::make()
+                    ->title('Usuario ya existe')
+                    ->body("El nombre de usuario '{$data['username']}' ya está en uso. Elige otro.")
+                    ->danger()
+                    ->send();
+                return;
+            }
         }
 
         try {

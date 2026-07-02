@@ -52,10 +52,30 @@ class AltaLinea extends Page implements HasForms
                             ->schema([
                                 Select::make('persona_natural_id')
                                     ->label('Seleccionar Cliente (Persona Natural)')
-                                    ->options(function () {
-                                        return DB::table('clientes.Persona_Natural')
+                                    ->getSearchResultsUsing(function (string $search) {
+                                        // Buscar por nombre, apellido, CI o número de teléfono
+                                        $term = '%' . strtolower($search) . '%';
+
+                                        // Clientes que coinciden por datos personales
+                                        $porDatos = DB::table('clientes.Persona_Natural')
                                             ->select('id_cliente', DB::raw("nombre || ' ' || apellido || ' - CI: ' || ci as label"))
+                                            ->whereRaw("LOWER(nombre || ' ' || apellido || ' ' || ci) LIKE ?", [$term])
                                             ->pluck('label', 'id_cliente');
+
+                                        // Clientes que coinciden por número de teléfono
+                                        $porNumero = DB::table('lineas.Linea')
+                                            ->join('clientes.Persona_Natural', 'lineas.Linea.id_cliente', '=', 'clientes.Persona_Natural.id_cliente')
+                                            ->select('clientes.Persona_Natural.id_cliente', DB::raw("clientes.Persona_Natural.nombre || ' ' || clientes.Persona_Natural.apellido || ' - CI: ' || clientes.Persona_Natural.ci as label"))
+                                            ->whereRaw("LOWER(lineas.Linea.numero_telefono::text) LIKE ?", [$term])
+                                            ->pluck('label', 'clientes.Persona_Natural.id_cliente');
+
+                                        return $porDatos->union($porNumero)->all();
+                                    })
+                                    ->getOptionLabelUsing(function ($value) {
+                                        $persona = DB::table('clientes.Persona_Natural')->where('id_cliente', $value)->first();
+                                        return $persona
+                                            ? "{$persona->nombre} {$persona->apellido} - CI: {$persona->ci}"
+                                            : $value;
                                     })
                                     ->searchable()
                                     ->reactive()
@@ -103,10 +123,30 @@ class AltaLinea extends Page implements HasForms
                             ->schema([
                                 Select::make('empresa_id')
                                     ->label('Seleccionar Cliente (Empresa)')
-                                    ->options(function () {
-                                        return DB::table('clientes.Empresa')
+                                    ->getSearchResultsUsing(function (string $search) {
+                                        // Buscar por razón social, NIT o número de teléfono
+                                        $term = '%' . strtolower($search) . '%';
+
+                                        // Empresas que coinciden por datos
+                                        $porDatos = DB::table('clientes.Empresa')
                                             ->select('id_cliente', DB::raw("razon_social || ' - NIT: ' || nit as label"))
+                                            ->whereRaw("LOWER(razon_social || ' ' || nit::text) LIKE ?", [$term])
                                             ->pluck('label', 'id_cliente');
+
+                                        // Empresas que coinciden por número de teléfono
+                                        $porNumero = DB::table('lineas.Linea')
+                                            ->join('clientes.Empresa', 'lineas.Linea.id_cliente', '=', 'clientes.Empresa.id_cliente')
+                                            ->select('clientes.Empresa.id_cliente', DB::raw("clientes.Empresa.razon_social || ' - NIT: ' || clientes.Empresa.nit as label"))
+                                            ->whereRaw("LOWER(lineas.Linea.numero_telefono::text) LIKE ?", [$term])
+                                            ->pluck('label', 'clientes.Empresa.id_cliente');
+
+                                        return $porDatos->union($porNumero)->all();
+                                    })
+                                    ->getOptionLabelUsing(function ($value) {
+                                        $empresa = DB::table('clientes.Empresa')->where('id_cliente', $value)->first();
+                                        return $empresa
+                                            ? "{$empresa->razon_social} - NIT: {$empresa->nit}"
+                                            : $value;
                                     })
                                     ->searchable()
                                     ->reactive()
@@ -162,6 +202,10 @@ class AltaLinea extends Page implements HasForms
 
                 Section::make('Credenciales de Acceso (App Mi VIVA)')
                     ->schema([
+                        TextInput::make('username')
+                            ->label('Nombre de Usuario')
+                            ->required()
+                            ->maxLength(50),
                         TextInput::make('password')
                             ->label('Contraseña')
                             ->password()
@@ -171,7 +215,7 @@ class AltaLinea extends Page implements HasForms
                             ->label('Confirmar Contraseña')
                             ->password()
                             ->required(),
-                    ])->columns(2),
+                    ])->columns(3),
             ])
             ->statePath('data');
     }
@@ -237,10 +281,17 @@ class AltaLinea extends Page implements HasForms
             ]);
 
             // 4. Crear o actualizar su Usuario de App
-            // El username se genera automáticamente a partir del número de teléfono asignado
-            $usernameGenerado = $numeroTelefono;
+            // El username puede ser el proporcionado o, como respaldo, el número de teléfono
+            $usernameGenerado = !empty($data['username']) ? $data['username'] : $numeroTelefono;
             $exists = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $clienteId)->exists();
             if (!$exists) {
+                // Validar que el username no esté en uso
+                $usernameEnUso = DB::table('seguridad.Usuario_Sistema')
+                    ->where('username', $usernameGenerado)
+                    ->exists();
+                if ($usernameEnUso) {
+                    throw new \Exception("El nombre de usuario '{$usernameGenerado}' ya está en uso. Elige otro.");
+                }
                 User::create([
                     'username'      => $usernameGenerado,
                     'password_hash' => Hash::make($data['password']),

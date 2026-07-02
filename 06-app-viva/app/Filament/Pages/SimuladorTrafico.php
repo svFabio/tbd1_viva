@@ -24,6 +24,17 @@ class SimuladorTrafico extends Page
         return auth()->user()->id_cliente !== null;
     }
 
+    protected function getViewData(): array
+    {
+        return [
+            'appsExentas' => DB::table('servicios.App_Exenta_En_Bolsa')
+                ->select('nombre_app')
+                ->distinct()
+                ->pluck('nombre_app')
+                ->toArray(),
+        ];
+    }
+
     public function procesarTrafico($tipoActividad, $segundos)
     {
         if ($segundos <= 0) return;
@@ -35,6 +46,22 @@ class SimuladorTrafico extends Page
         DB::beginTransaction();
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
+            
+            // Verificar vigencia de saldos por tipo de paquete
+            $tienePaqueteMegas = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.megas', '>', 0)
+                ->exists();
+
+            $tienePaqueteMinutos = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.minutos', '>', 0)
+                ->exists();
+
             $cantidadCobrar = 0;
             $tipoConsumoDB = 'Datos';
             $mensaje = "";
@@ -43,46 +70,58 @@ class SimuladorTrafico extends Page
             if ($tipoActividad === 'DATOS_GENERAL') {
                 $cantidadCobrar = $segundos * 1.0;
                 $mensaje = "Navegaste por $segundos segundos. Consumo: $cantidadCobrar MB.";
-            } 
+            }
             elseif ($tipoActividad === 'VOZ') {
                 $tipoConsumoDB = 'Voz';
                 $cantidadCobrar = $segundos * 1; // 1 min por segundo simulado
                 $mensaje = "Llamaste por $segundos min simulados.";
-            } 
-            elseif (in_array($tipoActividad, ['APP_WHATSAPP', 'APP_TIKTOK'])) {
-                $nombreApp = ($tipoActividad === 'APP_WHATSAPP') ? 'WhatsApp' : 'TikTok';
-                $tasaPorSegundo = ($tipoActividad === 'APP_WHATSAPP') ? 0.1 : 1.0;
-                
-                // Verificar bolsa ilimitada
+            }
+            elseif (str_starts_with($tipoActividad, 'APP_B64:')) {
+                // ── El nombre de la app viene en base64 desde el frontend
+                //    para soportar apps con espacios y símbolos ("WhatsApp Business", "Disney+", etc.)
+                $nombreApp = base64_decode(substr($tipoActividad, 8));
+                $tasaPorSegundo = 1.0;
+
+                // ── Consulta dinámica: busca en BD si el usuario tiene una bolsa activa
+                //    que incluya esta app como exenta (sin importar qué app sea)
                 $bolsaActiva = DB::table('servicios.Bolsa_Activa')
-                    ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                    ->join(
+                        'servicios.App_Exenta_En_Bolsa',
+                        'servicios.Bolsa_Activa.id_paquete',
+                        '=',
+                        'servicios.App_Exenta_En_Bolsa.id_paquete'
+                    )
                     ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
                     ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
-                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', '%' . $nombreApp . '%')
-                    ->select('servicios.Bolsa_Activa.id_bolsa_activa')
+                    ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
+                    ->select(
+                        'servicios.Bolsa_Activa.id_bolsa_activa',
+                        'servicios.App_Exenta_En_Bolsa.nombre_app as nombre_real'
+                    )
                     ->first();
 
                 if ($bolsaActiva) {
                     $cantidadCobrar = 0;
                     $idBolsaIlimitada = $bolsaActiva->id_bolsa_activa;
-                    $mensaje = "Usaste $nombreApp por $segundos segundos. ¡Te salió 100% GRATIS!";
+                    $nombreReal = $bolsaActiva->nombre_real;
+                    $mensaje = "Usaste $nombreReal por $segundos segundos. ¡Te salió 100% GRATIS (bolsa ilimitada activa)!";
                 } else {
                     $cantidadCobrar = $segundos * $tasaPorSegundo;
-                    $mensaje = "Usaste $nombreApp sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
+                    $mensaje = "Usaste $nombreApp por $segundos segundos sin bolsa ilimitada. Consumió $cantidadCobrar MB de tu saldo normal.";
                 }
             }
 
-            // Descontar del bolsillo (Bolsillo usa enteros, así que redondeamos)
+            // Descontar del bolsillo
             if ($tipoConsumoDB === 'Datos') {
-                $cobroBolsillo = (int) ceil($cantidadCobrar); // Si gastas 0.2 MB, te cobra 1 MB
-                if ($bolsillo->saldo_megas < $cobroBolsillo) {
-                    throw new \Exception("Megas Insuficientes. Intentaste consumir $cantidadCobrar MB pero solo tienes {$bolsillo->saldo_megas} MB.");
+                $cobroBolsillo = (int) ceil($cantidadCobrar);
+                if (!$tienePaqueteMegas || $bolsillo->saldo_megas < $cobroBolsillo) {
+                    throw new \Exception("Megas Insuficientes o caducados. Intentaste consumir $cantidadCobrar MB.");
                 }
                 $bolsillo->saldo_megas -= $cobroBolsillo;
             } elseif ($tipoConsumoDB === 'Voz') {
                 $cobroBolsillo = (int) ceil($cantidadCobrar);
-                if ($bolsillo->saldo_minutos < $cobroBolsillo) {
-                    throw new \Exception("Minutos Insuficientes. Necesitas $cantidadCobrar Min pero solo tienes {$bolsillo->saldo_minutos} Min.");
+                if (!$tienePaqueteMinutos || $bolsillo->saldo_minutos < $cobroBolsillo) {
+                    throw new \Exception("Minutos Insuficientes o caducados. Necesitas $cantidadCobrar Min.");
                 }
                 $bolsillo->saldo_minutos -= $cobroBolsillo;
             }
@@ -118,12 +157,18 @@ class SimuladorTrafico extends Page
         DB::beginTransaction();
         try {
             $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->lockForUpdate()->first();
-            
-            // 1 SMS = 160 caracteres
-            $cantidadSms = (int) ceil($longitudMensaje / 160);
+            $cantidadSms = ceil($longitudMensaje / 160);
 
-            if ($bolsillo->saldo_sms >= $cantidadSms) {
-                // Descuenta de la bolsa
+            // Verificar vigencia de saldo SMS
+            $tienePaqueteSms = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.Paquete.sms', '>', 0)
+                ->exists();
+
+            if ($tienePaqueteSms && $bolsillo->saldo_sms >= $cantidadSms) {
+                // Cobrar del saldo de SMSla bolsa
                 $bolsillo->saldo_sms -= $cantidadSms;
                 $mensaje = "Enviaste un mensaje de $longitudMensaje letras. Te descontamos $cantidadSms SMS de tu paquete.";
             } else {
@@ -153,5 +198,57 @@ class SimuladorTrafico extends Page
             DB::rollBack();
             Notification::make()->title('Error al enviar SMS')->body($e->getMessage())->danger()->send();
         }
+    }
+
+    public function getMaxSegundos($tipoActividad)
+    {
+        $user = auth()->user();
+        $linea = Linea::where('id_cliente', $user->id_cliente)->first();
+        if (!$linea) return 0;
+
+        $bolsillo = Bolsillo::where('id_linea', $linea->id_linea)->first();
+        if (!$bolsillo) return 0;
+
+        // Verificar vigencias independientes
+        $tienePaqueteMegas = DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+            ->where('servicios.Paquete.megas', '>', 0)
+            ->exists();
+            
+        $tienePaqueteMinutos = DB::table('servicios.Bolsa_Activa')
+            ->join('servicios.Paquete', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.Paquete.id_paquete')
+            ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+            ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+            ->where('servicios.Paquete.minutos', '>', 0)
+            ->exists();
+
+        if ($tipoActividad === 'DATOS_GENERAL') {
+            return ($bolsillo->saldo_megas > 0 && $tienePaqueteMegas) ? floor($bolsillo->saldo_megas) : 0;
+        }
+        
+        if ($tipoActividad === 'VOZ') {
+            return ($bolsillo->saldo_minutos > 0 && $tienePaqueteMinutos) ? floor($bolsillo->saldo_minutos) : 0;
+        }
+
+        if (str_starts_with($tipoActividad, 'APP_B64:')) {
+            $nombreApp = base64_decode(substr($tipoActividad, 8));
+            
+            $bolsaActiva = DB::table('servicios.Bolsa_Activa')
+                ->join('servicios.App_Exenta_En_Bolsa', 'servicios.Bolsa_Activa.id_paquete', '=', 'servicios.App_Exenta_En_Bolsa.id_paquete')
+                ->where('servicios.Bolsa_Activa.id_linea', $linea->id_linea)
+                ->where('servicios.Bolsa_Activa.fecha_expiracion', '>', Carbon::now())
+                ->where('servicios.App_Exenta_En_Bolsa.nombre_app', 'ilike', $nombreApp)
+                ->first();
+
+            if ($bolsaActiva) {
+                return 999999; // Ilimitado
+            } else {
+                return ($bolsillo->saldo_megas > 0 && $tienePaqueteMegas) ? floor($bolsillo->saldo_megas) : 0;
+            }
+        }
+
+        return 0;
     }
 }

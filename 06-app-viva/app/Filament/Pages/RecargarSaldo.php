@@ -41,25 +41,27 @@ class RecargarSaldo extends Page implements HasForms
     {
         $lineaId = session('current_linea_id', Linea::where('id_cliente', auth()->user()->id_cliente)->value('id_linea'));
 
-        // Verificamos si el cliente YA usó su bono este mes
-        // (Esto sí podemos consultarlo porque rol_app tiene permisos sobre finanzas.Recarga)
-        $yaUsoBono = DB::table('finanzas.Recarga')
-            ->where('id_linea', $lineaId)
-            ->where('aplicar_bono', true)
-            ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
+        // 1. Verificamos si la Promoción 1 (Doble Carga) está vigente según Comercial
+        $promoVigente = DB::table('comercial.Promocion')
+            ->where('id_promocion', 1)
+            ->whereRaw("CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin")
             ->exists();
 
-        // Usamos la conexión normal, ahora que rol_app tiene permisos sobre Promocion
-        $esDiaDobleCarga = (date('j') == 1) || DB::table('comercial.Promocion')
-            ->where('nombre_promo', 'ILIKE', '%Doble Carga%')
-            ->whereRaw('CURRENT_TIMESTAMP BETWEEN fecha_inicio AND fecha_fin')
-            ->exists();
+        // 2. Verificamos si el cliente YA usó su bono este mes
+        $yaUsoBono = false;
+        if ($promoVigente) {
+            $yaUsoBono = DB::table('finanzas.Recarga')
+                ->where('id_linea', $lineaId)
+                ->where('aplicar_bono', true)
+                ->whereRaw("date_trunc('month', fecha_recarga) = date_trunc('month', CURRENT_TIMESTAMP)")
+                ->exists();
+        }
 
-        $puedeActivarBono = $esDiaDobleCarga && !$yaUsoBono;
+        $puedeActivarBono = $promoVigente && !$yaUsoBono;
         
         $mensajeBono = '';
-        if (!$esDiaDobleCarga) {
-            $mensajeBono = 'Hoy no es día de Doble Carga.';
+        if (!$promoVigente) {
+            $mensajeBono = 'No hay campaña de Doble Carga vigente por ahora.';
         } elseif ($yaUsoBono) {
             $mensajeBono = 'Ya utilizaste tu Doble Carga este mes.';
         } else {

@@ -27,7 +27,7 @@ class Register extends BaseRegister
                     ->label('Carnet de Identidad (CI)')
                     ->required()
                     ->maxLength(20)
-                    ->unique('clientes.Persona_Natural', 'ci'),
+                    ->unique(config('database.default') . '.' . (new \App\Models\PersonaNatural())->getTable(), 'ci'),
                 TextInput::make('correo')
                     ->label('Correo Electrónico')
                     ->email()
@@ -37,7 +37,7 @@ class Register extends BaseRegister
                     ->label('Nombre de Usuario')
                     ->required()
                     ->maxLength(50)
-                    ->unique('seguridad.Usuario_Sistema', 'username'),
+                    ->unique(config('database.default') . '.' . (new User())->getTable(), 'username'),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ])

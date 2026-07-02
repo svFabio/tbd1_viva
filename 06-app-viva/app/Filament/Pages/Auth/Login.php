@@ -15,42 +15,70 @@ class Login extends BaseLogin
     {
         return $form
             ->schema([
+                // TAB PRINCIPAL: Administrador vs Cliente VIVA
+                // Por defecto se muestra "Cliente VIVA" primero
                 \Filament\Forms\Components\ToggleButtons::make('login_type')
                     ->label('')
                     ->options([
-                        'email' => 'Administrador',
                         'celular' => 'Cliente VIVA',
+                        'email'   => 'Administrador',
                     ])
                     ->icons([
-                        'email' => 'heroicon-o-user',
                         'celular' => 'heroicon-o-device-phone-mobile',
+                        'email'   => 'heroicon-o-user',
                     ])
                     ->grouped()
                     ->extraAttributes(['class' => 'flex justify-center'])
-                    ->default('email')
+                    ->default('celular')
                     ->reactive(),
 
-                \Filament\Forms\Components\TextInput::make('identificador')
-                    ->label('Correo Electrónico o Usuario')
-                    ->placeholder('correo@empresa.com o u.comercial')
-                    ->required(fn (callable $get) => $get('login_type') === 'email')
-                    ->hidden(fn (callable $get) => $get('login_type') === 'celular')
-                    ->autocomplete('username')
-                    ->autofocus(),
+                // ─── SECCIÓN CLIENTE ───────────────────────────────────────
+                // Sub-toggle: el cliente elige cómo identificarse
+                \Filament\Forms\Components\ToggleButtons::make('cliente_id_tipo')
+                    ->label('Iniciar sesión con')
+                    ->options([
+                        'numero'  => 'Número de celular',
+                        'usuario' => 'Usuario',
+                    ])
+                    ->icons([
+                        'numero'  => 'heroicon-o-phone',
+                        'usuario' => 'heroicon-o-identification',
+                    ])
+                    ->grouped()
+                    ->default('numero')
+                    ->reactive()
+                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular'),
 
+                // Campo: Número de celular (opción principal del cliente)
                 \Filament\Forms\Components\TextInput::make('celular')
                     ->label('Número de Celular')
                     ->placeholder('Ej: 70123456')
                     ->prefix('+591')
                     ->extraInputAttributes([
                         'pattern' => '[0-9]*',
-                        'style' => 'background-image: url("https://flagcdn.com/w20/bo.png"); background-repeat: no-repeat; background-position: 12px center; padding-left: 40px;'
+                        'style'   => 'background-image: url("https://flagcdn.com/w20/bo.png"); background-repeat: no-repeat; background-position: 12px center; padding-left: 40px;'
                     ])
                     ->tel()
                     ->minLength(8)
                     ->maxLength(8)
-                    ->required(fn (callable $get) => $get('login_type') === 'celular')
-                    ->hidden(fn (callable $get) => $get('login_type') === 'email'),
+                    ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'numero')
+                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'numero'),
+
+                // Campo: Username (opción alternativa del cliente)
+                \Filament\Forms\Components\TextInput::make('cliente_identificador')
+                    ->label('Nombre de Usuario')
+                    ->placeholder('mi_usuario')
+                    ->autocomplete('username')
+                    ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'usuario')
+                    ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'usuario'),
+
+                // ─── SECCIÓN ADMINISTRADOR ─────────────────────────────────────────────
+                \Filament\Forms\Components\TextInput::make('identificador')
+                    ->label('Usuario')
+                    ->placeholder('u.comercial')
+                    ->required(fn (callable $get) => $get('login_type') === 'email')
+                    ->hidden(fn (callable $get) => $get('login_type') !== 'email')
+                    ->autocomplete('username'),
 
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
@@ -60,73 +88,67 @@ class Login extends BaseLogin
 
     protected function getCredentialsFromFormData(array $data): array
     {
-        $password = $data['password'];
-        $is_celular = ($data['login_type'] ?? 'email') === 'celular';
-        
-        $identificador = '';
-        if ($is_celular) {
-            $identificador = '591' . trim($data['celular'] ?? '');
-        } else {
-            $identificador = trim($data['identificador'] ?? '');
-        }
+        $password   = $data['password'];
+        $login_type = $data['login_type'] ?? 'celular';
 
         $id_cliente = null;
 
-        // 1. Verificamos si es un correo electrónico válido
-        if (!$is_celular && filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
-            $persona = DB::table('clientes.Persona_Natural')->where('correo', $identificador)->first();
-            if ($persona) {
-                $id_cliente = $persona->id_cliente;
-            }
-        } 
-        // 2. Verificamos si es un número de celular de Bolivia (Prefijo 591 y 8 dígitos más)
-        elseif ($is_celular && preg_match('/^591([0-9]{8})$/', $identificador, $matches)) {
-            $numero_sin_prefijo = $matches[1];
-            $linea = DB::table('lineas.Linea')->where('numero_telefono', $numero_sin_prefijo)->first();
-            if ($linea) {
-                $id_cliente = $linea->id_cliente;
-            }
-        } 
-        // 3. Verificamos si es un usuario administrador (username directo)
-        elseif (!$is_celular && preg_match('/^[a-zA-Z0-9_.]+$/', $identificador)) {
-            $admin = DB::table('seguridad.Usuario_Sistema')
-                ->where('username', $identificador)
-                ->whereNull('id_cliente')
-                ->first();
-            
-            if ($admin) {
-                return [
-                    'username' => $admin->username,
-                    'password' => $password,
-                ];
+        // ── CLIENTE VIVA ──────────────────────────────────────────────
+        if ($login_type === 'celular') {
+            $cliente_id_tipo = $data['cliente_id_tipo'] ?? 'numero';
+
+            if ($cliente_id_tipo === 'numero') {
+                // Login por número de celular
+                $numero = '591' . trim($data['celular'] ?? '');
+                if (preg_match('/^591([0-9]{8})$/', $numero, $matches)) {
+                    $linea = DB::table('lineas.Linea')->where('numero_telefono', $matches[1])->first();
+                    if ($linea) {
+                        $id_cliente = $linea->id_cliente;
+                    }
+                } else {
+                    throw ValidationException::withMessages([
+                        'data.celular' => 'El número debe tener 8 dígitos.',
+                    ]);
+                }
             } else {
-                throw ValidationException::withMessages([
-                    'data.identificador' => 'Credenciales incorrectas o usuario no autorizado.',
-                ]);
+                // Login por username
+                $identificador = trim($data['cliente_identificador'] ?? '');
+                $usuario = DB::table('seguridad.Usuario_Sistema')
+                    ->where('username', $identificador)
+                    ->whereNotNull('id_cliente')
+                    ->first();
+                if ($usuario) {
+                    $id_cliente = $usuario->id_cliente;
+                }
             }
-        }
-        else {
-            // Si no cumple el formato, detenemos el login
+
+            // Buscamos el username de autenticación a partir del id_cliente
+            if ($id_cliente) {
+                $usuario = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $id_cliente)->first();
+                if ($usuario) {
+                    return ['username' => $usuario->username, 'password' => $password];
+                }
+            }
+
             throw ValidationException::withMessages([
-                'data.identificador' => 'El formato es inválido. Revise sus datos.',
-                'data.celular' => 'El número debe tener 8 dígitos.',
+                'data.celular' => 'Credenciales incorrectas. Verifique sus datos.',
             ]);
         }
 
-        // Si encontramos al cliente, buscamos su registro de autenticación en Usuario_Sistema
+        // ── ADMINISTRADOR ────────────────────────────────────────────────
+        $identificador = trim($data['identificador'] ?? '');
 
-        $username = null;
-        if ($id_cliente) {
-            $usuario = DB::table('seguridad.Usuario_Sistema')->where('id_cliente', $id_cliente)->first();
-            if ($usuario) {
-                $username = $usuario->username;
-            }
+        $admin = DB::table('seguridad.Usuario_Sistema')
+            ->where('username', $identificador)
+            ->whereNull('id_cliente')
+            ->first();
+
+        if ($admin) {
+            return ['username' => $admin->username, 'password' => $password];
         }
 
-        // Devolvemos las credenciales a Laravel. Si $username es null, Laravel rechazará el login automáticamente.
-        return [
-            'username' => $username ?? '---no-encontrado---',
-            'password' => $password,
-        ];
+        throw ValidationException::withMessages([
+            'data.identificador' => 'Credenciales incorrectas o usuario no autorizado.',
+        ]);
     }
 }

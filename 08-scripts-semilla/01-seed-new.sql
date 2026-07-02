@@ -41,39 +41,39 @@ TRUNCATE TABLE clientes."Cliente"                CASCADE;
 -- 30 clientes: 25 personas naturales + 5 empresas bolivianas
 -- ============================================================
 
-INSERT INTO clientes."Cliente" (id_cliente, fecha_registro, estado) VALUES
--- personas naturales de Cochabamba, La Paz, Santa Cruz
-(1,  '2021-03-15 08:30:00', 'Activo'),
-(2,  '2021-07-22 10:15:00', 'Activo'),
-(3,  '2022-01-10 09:00:00', 'Activo'),
-(4,  '2022-04-05 14:20:00', 'Activo'),
-(5,  '2022-08-18 11:45:00', 'Activo'),
-(6,  '2022-11-30 16:00:00', 'Activo'),
-(7,  '2023-02-14 08:00:00', 'Activo'),
-(8,  '2023-05-20 13:30:00', 'Activo'),
-(9,  '2023-08-09 10:00:00', 'Activo'),
-(10, '2023-10-25 15:45:00', 'Activo'),
-(11, '2024-01-08 09:30:00', 'Activo'),
-(12, '2024-03-17 11:00:00', 'Activo'),
-(13, '2024-06-21 14:00:00', 'Activo'),
-(14, '2024-09-03 08:45:00', 'Activo'),
-(15, '2024-12-11 10:30:00', 'Activo'),
-(16, '2025-02-20 09:00:00', 'Activo'),
-(17, '2025-04-15 11:30:00', 'Activo'),
-(18, '2025-06-30 14:00:00', 'Activo'),
-(19, '2025-09-10 08:00:00', 'Inactivo'),
-(20, '2025-11-05 10:45:00', 'Activo'),
-(21, '2026-01-12 09:15:00', 'Activo'),
-(22, '2026-02-08 13:00:00', 'Activo'),
-(23, '2026-03-01 08:30:00', 'Activo'),
-(24, '2026-04-10 10:00:00', 'Activo'),
-(25, '2026-05-02 09:30:00', 'Activo'),
+INSERT INTO clientes."Cliente" (id_cliente, fecha_registro, estado, ciudad) VALUES
+-- personas naturales
+(1,  '2021-03-15 08:30:00', 'Activo', 'Cochabamba'),
+(2,  '2021-07-22 10:15:00', 'Activo', 'Cochabamba'),
+(3,  '2022-01-10 09:00:00', 'Activo', 'Cochabamba'),
+(4,  '2022-04-05 14:20:00', 'Activo', 'Cochabamba'),
+(5,  '2022-08-18 11:45:00', 'Activo', 'Cochabamba'),
+(6,  '2022-11-30 16:00:00', 'Activo', 'La Paz'),
+(7,  '2023-02-14 08:00:00', 'Activo', 'La Paz'),
+(8,  '2023-05-20 13:30:00', 'Activo', 'La Paz'),
+(9,  '2023-08-09 10:00:00', 'Activo', 'La Paz'),
+(10, '2023-10-25 15:45:00', 'Activo', 'La Paz'),
+(11, '2024-01-08 09:30:00', 'Activo', 'Santa Cruz'),
+(12, '2024-03-17 11:00:00', 'Activo', 'Santa Cruz'),
+(13, '2024-06-21 14:00:00', 'Activo', 'Santa Cruz'),
+(14, '2024-09-03 08:45:00', 'Activo', 'Santa Cruz'),
+(15, '2024-12-11 10:30:00', 'Activo', 'Santa Cruz'),
+(16, '2025-02-20 09:00:00', 'Activo', 'Oruro'),
+(17, '2025-04-15 11:30:00', 'Activo', 'Oruro'),
+(18, '2025-06-30 14:00:00', 'Activo', 'Oruro'),
+(19, '2025-09-10 08:00:00', 'Inactivo', 'Oruro'),
+(20, '2025-11-05 10:45:00', 'Activo', 'Oruro'),
+(21, '2026-01-12 09:15:00', 'Activo', 'Tarija'),
+(22, '2026-02-08 13:00:00', 'Activo', 'Tarija'),
+(23, '2026-03-01 08:30:00', 'Activo', 'Tarija'),
+(24, '2026-04-10 10:00:00', 'Activo', 'Tarija'),
+(25, '2026-05-02 09:30:00', 'Activo', 'Tarija'),
 -- empresas
-(26, '2020-06-01 09:00:00', 'Activo'),
-(27, '2021-02-15 10:00:00', 'Activo'),
-(28, '2022-07-10 11:00:00', 'Activo'),
-(29, '2023-01-20 09:30:00', 'Activo'),
-(30, '2023-09-05 14:00:00', 'Activo');
+(26, '2020-06-01 09:00:00', 'Activo', 'Cochabamba'),
+(27, '2021-02-15 10:00:00', 'Activo', 'Cochabamba'),
+(28, '2022-07-10 11:00:00', 'Activo', 'La Paz'),
+(29, '2023-01-20 09:30:00', 'Activo', 'La Paz'),
+(30, '2024-03-05 08:00:00', 'Activo', 'Santa Cruz');
 
 INSERT INTO clientes."Persona_Natural" (id_persona, id_cliente, nombre, apellido, ci, correo) VALUES
 (1,  1,  'Juan Carlos',    'Mamani Choque',     '7845123 CB',  'jmamani@gmail.com'),
@@ -611,59 +611,26 @@ INSERT INTO finanzas."Transaccion" (id_transaccion, id_linea, tipo_transaccion, 
 -- ============================================================
 
 INSERT INTO comercial."Promocion" (id_promocion, nombre_promo, descripcion, fecha_inicio, fecha_fin) VALUES
-(1, 'Doble Carga Enero 2026',       'Recarga y recibe el doble en saldo adicional',                  '2026-01-01 00:00:00', '2026-01-31 23:59:59'),
-(2, 'Recarga Digital 25% Extra',    '25% adicional en recargas por APP o banca digital',             '2025-08-26 00:00:00', '2026-02-24 23:59:59'),
-(3, 'Bono Bienvenida Postpago',     'Bs 50 de saldo gratis al activar plan postpago por primera vez','2024-01-01 00:00:00', '2026-12-31 23:59:59'),
-(4, 'Doble Carga Abril 2026',       'Recarga y recibe el doble en saldo adicional',                  '2026-04-01 00:00:00', '2026-04-30 23:59:59'),
-(5, 'Pack WOW Finde Gratis',        'Bolsa WOW Fin de Semana gratis para clientes VIVA antiguos',    '2026-04-01 00:00:00', '2026-06-30 23:59:59'),
-(6, 'Numero Amigo 30 dias',         'Llama ilimitado a tu numero amigo VIVA por 30 dias',            '2026-01-01 00:00:00', '2026-12-31 23:59:59'),
-(7, 'Doble Carga Mayo 2026',        'Recarga y recibe el doble en saldo adicional',                  '2026-05-01 00:00:00', '2026-05-31 23:59:59');
+(1, 'Doble Carga Mensual',        'Recarga y recibe el doble en saldo adicional',                  '2026-01-01 00:00:00', '2026-12-31 23:59:59'),
+(2, 'Numero Amigo 30 dias',       'Llama ilimitado a tus números amigos VIVA por 30 días',         '2026-01-01 00:00:00', '2026-12-31 23:59:59');
 
 INSERT INTO comercial."Condicion_Promocion" (id_condicion, id_promocion, descripcion_condicion) VALUES
-(1,  1, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(2,  1, 'Monto de recarga maximo Bs 200 para recibir el doble'),
-(3,  2, 'Recarga realizada por APP VIVA o banca digital'),
-(4,  2, 'Monto minimo de recarga Bs 10'),
-(5,  3, 'Solo aplica al activar un plan postpago por primera vez'),
-(6,  4, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(7,  4, 'Monto de recarga maximo Bs 200'),
-(8,  5, 'Antiguedad minima de 12 meses como cliente VIVA'),
-(9,  6, 'Ambas lineas deben ser de la red VIVA Bolivia'),
-(10, 6, 'Linea origen debe tener saldo suficiente para activar el servicio'),
-(11, 7, 'Antiguedad minima de 4 meses como cliente VIVA'),
-(12, 7, 'Monto de recarga maximo Bs 200');
+(1,  1, 'Monto de recarga máximo Bs 200 para recibir el doble'),
+(2,  1, 'Válido una vez por mes calendario'),
+(3,  2, 'Ambas líneas deben ser de la red VIVA Bolivia');
 
 INSERT INTO comercial."Promocion_Linea" (id_promo_linea, id_promocion, id_linea, fecha_aplicacion) VALUES
-(1, 1, 1, '2026-01-15 09:10:00'), 
-(2, 6, 13, '2026-02-20 10:00:00'), 
-(3, 6, 16, '2026-03-25 14:00:00'),
-(4, 3, 2, '2026-04-15 14:22:00'), 
-(5, 7, 10, '2026-05-18 09:00:00'),
-(6,  3, 2,  '2021-07-22 10:15:00'),
-(7,  3, 4,  '2022-04-05 14:20:00'),
-(8,  3, 8,  '2023-05-20 13:30:00'),
-(9,  4, 1,  '2026-04-15 09:00:00'),
-(10, 4, 13, '2026-04-20 14:00:00'),
-(11, 4, 20, '2026-04-01 09:00:00'),
-(12, 5, 10, '2026-05-17 00:00:00'),
-(13, 5, 15, '2026-05-17 00:00:00'),
-(14, 6, 1,  '2026-02-01 10:00:00'),
-(15, 6, 7,  '2026-03-01 10:00:00'),
-(16, 7, 1,  '2026-05-01 09:10:00'),
-(17, 7, 5,  '2026-05-15 13:00:00'),
-(18, 7, 23, '2026-05-08 09:00:00');
--- Ahora sí, los números amigos amarrados a la promoción ID 2 y 3
+(1, 1, 1,  '2026-06-15 09:10:00'), -- Doble Carga para linea 1
+(2, 2, 1,  '2026-06-01 10:00:00'), -- Numero amigo para linea 1
+(3, 2, 7,  '2026-06-05 14:00:00'), -- Numero amigo para linea 7
+(4, 2, 13, '2026-06-10 09:00:00'); -- Numero amigo para linea 13
+
+-- Ahora sí, los números amigos amarrados a la promoción_linea correspondiente
 INSERT INTO comercial."Numero_Amigo" (id_numero_amigo, id_linea_origen, id_linea_destino, id_promo_linea) VALUES
-(1, 1,  5,  14), -- Línea 1 vinculada a la promo-línea 14
-(2, 1,  3,  14), -- Línea 1 vinculada a la promo-línea 14
-(3, 7,  10, 15), -- Línea 7 vinculada a la promo-línea 15
-(4, 13, 16, 10), -- Línea 13 vinculada a la promo-línea 10 (Cambiado de NULL a 10)
-(5, 20, 21, 11), -- Línea 20 vinculada a la promo-línea 11 (Cambiado de NULL a 11)
-(6, 23, 25, 18), -- Línea 23 vinculada a la promo-línea 18 (Cambiado de NULL a 18)
-(7, 3,  7,  2),  -- Línea 3 vinculada a la promo-línea 2 (Cambiado de NULL a 2)
-(8, 11, 12, 1),  -- Vinculado a la promo-línea 1 (Cambiado de NULL a 1)
-(9, 22, 24, 4),  -- Vinculado a la promo-línea 4 (Cambiado de NULL a 4)
-(10, 17, 18, 6); -- Vinculado a la promo-línea 6 (Cambiado de NULL a 6)
+(1, 1,  5,  2), -- Línea 1 vinculada a la promo-línea 2
+(2, 1,  3,  2), -- Línea 1 vinculada a la promo-línea 2
+(3, 7,  10, 3), -- Línea 7 vinculada a la promo-línea 3
+(4, 13, 16, 4); -- Línea 13 vinculada a la promo-línea 4
 
 -- ============================================================
 -- ESQUEMA: fidelizacion

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\IngresosMensualesChart;
+use App\Filament\Widgets\ReportesStatsOverview;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +22,14 @@ class DashboardReportes extends Page
         $user = auth()->user();
         // Dinámico: cualquier usuario con rol_reporte puede acceder, no solo 'u.reporte'
         return $user && $user->rol_db === 'rol_reporte';
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ReportesStatsOverview::class,
+            IngresosMensualesChart::class,
+        ];
     }
 
     protected function getViewData(): array

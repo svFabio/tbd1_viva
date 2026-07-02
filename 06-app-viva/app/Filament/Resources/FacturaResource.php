@@ -21,7 +21,8 @@ class FacturaResource extends Resource
 
     public static function canAccess(): bool
     {
-        return true; // Dejamos pasar al frontend para que la BD lo reviente
+        $rol = auth()->user()?->rol_db;
+        return $rol === 'rol_finanzas';
     }
 
     public static function form(Form $form): Form

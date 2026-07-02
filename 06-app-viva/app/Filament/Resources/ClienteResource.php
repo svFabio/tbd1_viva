@@ -160,6 +160,20 @@ class ClienteResource extends Resource
                               ->orWhere('apellido', 'ilike', "%{$search}%");
                         })->orWhereHas('empresa', function ($q) use ($search) {
                             $q->where('razon_social', 'ilike', "%{$search}%");
+                        })->orWhereHas('lineas', function ($q) use ($search) {
+                            $q->where('numero_telefono', 'ilike', "%{$search}%");
+                        });
+                    }),
+
+                Tables\Columns\TextColumn::make('numeros_linea')
+                    ->label('Número(s) de Línea')
+                    ->state(function ($record) {
+                        $numeros = $record->lineas()->pluck('numero_telefono')->toArray();
+                        return count($numeros) ? implode(', ', $numeros) : '-';
+                    })
+                    ->searchable(query: function ($query, string $search) {
+                        $query->whereHas('lineas', function ($q) use ($search) {
+                            $q->where('numero_telefono', 'ilike', "%{$search}%");
                         });
                     }),
 

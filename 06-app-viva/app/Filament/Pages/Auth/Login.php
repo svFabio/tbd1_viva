@@ -38,11 +38,11 @@ class Login extends BaseLogin
                     ->label('Iniciar sesión con')
                     ->options([
                         'numero'  => 'Número de celular',
-                        'usuario' => 'Usuario / Correo',
+                        'usuario' => 'Usuario',
                     ])
                     ->icons([
                         'numero'  => 'heroicon-o-phone',
-                        'usuario' => 'heroicon-o-at-symbol',
+                        'usuario' => 'heroicon-o-identification',
                     ])
                     ->grouped()
                     ->default('numero')
@@ -64,18 +64,18 @@ class Login extends BaseLogin
                     ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'numero')
                     ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'numero'),
 
-                // Campo: Username o correo (opción alternativa del cliente)
+                // Campo: Username (opción alternativa del cliente)
                 \Filament\Forms\Components\TextInput::make('cliente_identificador')
-                    ->label('Usuario o Correo Electrónico')
-                    ->placeholder('mi_usuario o correo@gmail.com')
+                    ->label('Nombre de Usuario')
+                    ->placeholder('mi_usuario')
                     ->autocomplete('username')
                     ->required(fn (callable $get) => $get('login_type') === 'celular' && $get('cliente_id_tipo') === 'usuario')
                     ->hidden(fn (callable $get) => $get('login_type') !== 'celular' || $get('cliente_id_tipo') !== 'usuario'),
 
-                // ─── SECCIÓN ADMINISTRADOR ─────────────────────────────────
+                // ─── SECCIÓN ADMINISTRADOR ─────────────────────────────────────────────
                 \Filament\Forms\Components\TextInput::make('identificador')
-                    ->label('Correo Electrónico o Usuario')
-                    ->placeholder('correo@empresa.com o u.comercial')
+                    ->label('Usuario')
+                    ->placeholder('u.comercial')
                     ->required(fn (callable $get) => $get('login_type') === 'email')
                     ->hidden(fn (callable $get) => $get('login_type') !== 'email')
                     ->autocomplete('username'),
@@ -111,21 +111,14 @@ class Login extends BaseLogin
                     ]);
                 }
             } else {
-                // Login por username o correo
+                // Login por username
                 $identificador = trim($data['cliente_identificador'] ?? '');
-                if (filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
-                    $persona = DB::table('clientes.Persona_Natural')->where('correo', $identificador)->first();
-                    if ($persona) {
-                        $id_cliente = $persona->id_cliente;
-                    }
-                } else {
-                    $usuario = DB::table('seguridad.Usuario_Sistema')
-                        ->where('username', $identificador)
-                        ->whereNotNull('id_cliente')
-                        ->first();
-                    if ($usuario) {
-                        $id_cliente = $usuario->id_cliente;
-                    }
+                $usuario = DB::table('seguridad.Usuario_Sistema')
+                    ->where('username', $identificador)
+                    ->whereNotNull('id_cliente')
+                    ->first();
+                if ($usuario) {
+                    $id_cliente = $usuario->id_cliente;
                 }
             }
 
@@ -142,20 +135,13 @@ class Login extends BaseLogin
             ]);
         }
 
-        // ── ADMINISTRADOR ─────────────────────────────────────────────
+        // ── ADMINISTRADOR ────────────────────────────────────────────────
         $identificador = trim($data['identificador'] ?? '');
 
-        if (filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
-            $admin = DB::table('seguridad.Usuario_Sistema')
-                ->where('correo', $identificador)
-                ->whereNull('id_cliente')
-                ->first();
-        } else {
-            $admin = DB::table('seguridad.Usuario_Sistema')
-                ->where('username', $identificador)
-                ->whereNull('id_cliente')
-                ->first();
-        }
+        $admin = DB::table('seguridad.Usuario_Sistema')
+            ->where('username', $identificador)
+            ->whereNull('id_cliente')
+            ->first();
 
         if ($admin) {
             return ['username' => $admin->username, 'password' => $password];
